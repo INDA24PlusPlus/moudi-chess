@@ -1,5 +1,6 @@
-use std::convert::Into;
-use crate::{board::*, BitBoard};
+use core::fmt::Display;
+use std::{convert::Into};
+use crate::{bitboard, board::*, BitBoard, File};
 
 mod pawn;
 pub use pawn::*;
@@ -15,7 +16,7 @@ mod king;
 pub use king::*;
 
 
-#[derive(Copy, Clone, PartialEq, Eq)]
+#[derive(Copy, Clone, PartialEq, Eq, Debug)]
 pub enum PieceType {
     Empty,
     Pawn,
@@ -27,11 +28,11 @@ pub enum PieceType {
 }
 
 impl PieceType {
-    pub fn to_value(self) -> u8 {
-        (self as u8) - 1
+    pub fn to_value(self) -> i8 {
+        (self as i8) - 1
     }
     
-    pub fn from_value(value: u8) -> PieceType {
+    pub fn from_value(value: i8) -> PieceType {
         match value {
             0 => PieceType::Pawn,
             1 => PieceType::Knight,
@@ -47,11 +48,11 @@ impl PieceType {
 pub struct Piece {
     piece: PieceType,
     color: Side,
-    pos: [u8; 2]
+    pos: [i8; 2]
 }
 
 impl Piece {
-    pub fn new(piece: PieceType, color: Side, x: u8, y: u8) -> Self {
+    pub fn new(piece: PieceType, color: Side, x: i8, y: i8) -> Self {
         Piece {
             piece,
             color,
@@ -59,7 +60,7 @@ impl Piece {
         }
     }
 
-    pub fn attack(&self, board: &Board, x: u8, y: u8) -> bool {
+    pub fn attack(&self, board: &Board, x: i8, y: i8) -> bool {
         match self.piece {
             PieceType::Pawn => pawn::is_allowed_move(self, board, x, y),
             PieceType::Knight => knight::is_allowed_move(self, x, y),
@@ -68,6 +69,18 @@ impl Piece {
             PieceType::Queen => queen::is_allowed_move(self, board, x, y),
             PieceType::King => king::is_allowed_move(self, board, x, y),
             _ => false
+        }
+    }
+
+    pub fn get_possible_moves(&self, board: &Board) -> BitBoard {
+        match self.piece {
+            PieceType::Pawn => pawn::get_all_moves(self, board),
+            PieceType::Knight => knight::get_all_moves(self),
+            PieceType::Bishop => bishop::get_all_moves(self, board),
+            PieceType::Rook => rook::get_all_moves(self, board),
+            PieceType::Queen => queen::get_all_moves(self, board),
+            PieceType::King => king::get_all_moves(self, board),
+            _ => bitboard::EMPTY,
         }
     }
 
@@ -81,6 +94,12 @@ impl Piece {
 
     pub fn get_color(&self) -> Side {
         self.color
+    }
+}
+
+impl Display for Piece {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?} {:?}({}{})", self.color, self.piece, ((self.pos[0] as u8) + b'A') as char, self.pos[1])
     }
 }
 

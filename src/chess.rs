@@ -17,10 +17,8 @@ impl Chess {
         }
     }
 
-    pub fn is_selectable(&self, x: u8, y: u8) -> bool {
+    pub fn is_selectable(&self, x: i8, y: i8) -> bool {
         self.board.get_sides_board().get(y * 8 + x)
     }
     
-    pub fn 
-
 }

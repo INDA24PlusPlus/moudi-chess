@@ -21,10 +21,10 @@ impl BitBoard {
         self.set(y * 8 + x, value);
     }
 
-    pub fn predicate_and_set<F>(&mut self, x: u8, y: u8, predicate: F) -> bool 
-        where F: Fn(u8, u8) -> bool
+    pub fn predicate_and_set<F>(&mut self, x: i8, y: i8, predicate: F) -> bool 
+        where F: Fn(i8, i8) -> bool
     {
-        if predicate(x, y) {
+        if Board::is_inbounds(x, y) && predicate(x, y) {
             self.set(((y * 8) + x) as usize, true);
             return true;
         }
@@ -32,27 +32,27 @@ impl BitBoard {
         false
     }
 
-    pub fn is_empty_on_board_and_set(&mut self, board: &Board, x: u8, y: u8) -> bool {
-        Board::is_inbounds(x, y) && self.predicate_and_set(x, y, |x, y| board.is_empty(x, y))
+    pub fn is_empty_on_board_and_set(&mut self, board: &Board, x: i8, y: i8) -> bool {
+        self.predicate_and_set(x, y, |x, y| board.is_empty(x, y))
     }
 
-    pub fn compare_and_set(&mut self, compare: &Self, compare_value: bool, x: u8, y: u8) -> bool {
-        Board::is_inbounds(x, y) && self.predicate_and_set(x, y, |x, y| compare.get(y * 8 + x) == compare_value)
+    pub fn compare_and_set(&mut self, compare: Self, compare_value: bool, x: i8, y: i8) -> bool {
+        self.predicate_and_set(x, y, |x, y| compare.get(y * 8 + x) == compare_value)
     }
 
-    pub fn get(&self, index: u8) -> bool {
+    pub fn get(&self, index: i8) -> bool {
+        debug_assert!(index >= 0);
         (self.0 & (1u64 << index)) != 0
     }
 }
 
 impl Display for BitBoard {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let mut res = write!(f, "  ABCDEFGH\n");
         for (i, byte) in self.0.to_be_bytes().iter().enumerate() {
-            res = write!(f, "{}|{:08b}\n", i, byte);
+            write!(f, "{}|{:08b}\n", 8 - i, byte.reverse_bits());
         }
 
-        res 
+        write!(f, "  ABCDEFGH\n")
     }
 }
 

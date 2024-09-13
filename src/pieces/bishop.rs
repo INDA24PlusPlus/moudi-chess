@@ -3,7 +3,7 @@ use std::cmp::min;
 use crate::{bitboard, BitBoard};
 use super::{Board, Piece};
 
-pub fn is_allowed_move(piece: &Piece, board: &Board, x: u8, y: u8) -> bool {
+pub fn is_allowed_move(piece: &Piece, board: &Board, x: i8, y: i8) -> bool {
     get_all_moves(piece, board).get(y * 8 + x)
 }
 
@@ -13,7 +13,7 @@ pub fn get_all_moves(piece: &Piece, board: &Board) -> BitBoard {
     let [x, y] = piece.pos;
 
     // NORTH-WEST
-    for offset in 1..(min(x, 7 - y)) {
+    for offset in 1..=(min(x, 7 - y)) {
         if !bitboard.is_empty_on_board_and_set(board, x - offset, y + offset) {
             bitboard.predicate_and_set(x - offset, y + offset, |x, y| opponent.get((y * 8) + x));
             break;
@@ -21,7 +21,7 @@ pub fn get_all_moves(piece: &Piece, board: &Board) -> BitBoard {
     }
 
     // NORTH-EAST
-    for offset in 1..(min(7 - x, 7 - y)) {
+    for offset in 1..=(min(7 - x, 7 - y)) {
         if !bitboard.is_empty_on_board_and_set(board, x + offset, y + offset) {
             bitboard.predicate_and_set(x + offset, y + offset, |x, y| opponent.get((y * 8) + x));
             break;
@@ -29,7 +29,7 @@ pub fn get_all_moves(piece: &Piece, board: &Board) -> BitBoard {
     }
 
     // SOUTH-WEST
-    for offset in 1..(min(x, y)) {
+    for offset in 1..=(min(x, y)) {
         if !bitboard.is_empty_on_board_and_set(board, x - offset, y - offset) {
             bitboard.predicate_and_set(x - offset, y - offset, |x, y| opponent.get((y * 8) + x));
             break;
@@ -37,7 +37,7 @@ pub fn get_all_moves(piece: &Piece, board: &Board) -> BitBoard {
     }
 
     // SOUTH-EAST
-    for offset in 1..(min(7 - x, y)) {
+    for offset in 1..=(min(7 - x, y)) {
         if !bitboard.is_empty_on_board_and_set(board, x + offset, y - offset) {
             bitboard.predicate_and_set(x + offset, y - offset, |x, y| opponent.get((y * 8) + x));
             break;

@@ -1,7 +1,7 @@
 use crate::{bitboard, BitBoard};
 use super::{Board, Piece};
 
-pub fn is_allowed_move(piece: &Piece, board: &Board, x: u8, y: u8) -> bool {
+pub fn is_allowed_move(piece: &Piece, board: &Board, x: i8, y: i8) -> bool {
     get_all_moves(piece, board).get(y * 8 + x)
 }
 
@@ -11,7 +11,7 @@ pub fn get_all_moves(piece: &Piece, board: &Board) -> BitBoard {
     let [x, y] = piece.pos;
 
     // NORTH
-    for offset in 1..(7 - y) {
+    for offset in 1..=(7 - y) {
         if !bitboard.is_empty_on_board_and_set(board, x, y + offset) {
             bitboard.predicate_and_set(x, y + offset, |x, y| opponent.get((y * 8) + x));
             break;
@@ -19,7 +19,7 @@ pub fn get_all_moves(piece: &Piece, board: &Board) -> BitBoard {
     }
 
     // WEST
-    for offset in 1..(x) {
+    for offset in 1..=(x) {
         if !bitboard.is_empty_on_board_and_set(board, x - offset, y) {
             bitboard.predicate_and_set(x - offset, y, |x, y| opponent.get((y * 8) + x));
             break;
@@ -27,7 +27,7 @@ pub fn get_all_moves(piece: &Piece, board: &Board) -> BitBoard {
     }
 
     // SOUTH
-    for offset in 1..(y) {
+    for offset in 1..=(y) {
         if !bitboard.is_empty_on_board_and_set(board, x, y - offset) {
             bitboard.predicate_and_set(x, y - offset, |x, y| opponent.get((y * 8) + x));
             break;
@@ -35,7 +35,7 @@ pub fn get_all_moves(piece: &Piece, board: &Board) -> BitBoard {
     }
 
     // EAST
-    for offset in 1..(7 - x) {
+    for offset in 1..=(7 - x) {
         if !bitboard.is_empty_on_board_and_set(board, x + offset, y) {
             bitboard.predicate_and_set(x + offset, y, |x, y| opponent.get((y * 8) + x));
             break;

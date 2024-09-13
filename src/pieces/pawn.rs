@@ -1,23 +1,28 @@
 use crate::{bitboard, BitBoard};
 use super::{Board, Piece, Side};
 
-pub fn is_allowed_move(piece: &Piece, board: &Board, x: u8, y: u8) -> bool {
+pub fn is_allowed_move(piece: &Piece, board: &Board, x: i8, y: i8) -> bool {
     get_all_moves(piece, board).get(y * 8 + x)
 }
 
 pub fn get_all_moves(piece: &Piece, board: &Board) -> BitBoard {
-    get_move_bitboard(piece, board) & get_attack_bitboard(piece, board)
+    get_move_bitboard(piece, board) | get_attack_bitboard(piece, board)
 }
 
 fn get_move_bitboard(piece: &Piece, board: &Board) -> BitBoard {
     let mut bitboard = bitboard::EMPTY;
     let [x, y] = piece.pos;
 
-    if bitboard.is_empty_on_board_and_set(board, x, y + 1) {
-        if piece.color == Side::White && piece.pos[1] == 1 {
-            bitboard.is_empty_on_board_and_set(board, x, 3);
-        } else if piece.color == Side::Black && piece.pos[1] == 6 {
-            bitboard.is_empty_on_board_and_set(board, x, 6);
+    match piece.color {
+        Side::White => {
+            if bitboard.is_empty_on_board_and_set(board, x, y + 1) && piece.pos[1] == 1 {
+                bitboard.is_empty_on_board_and_set(board, x, 3);
+            }
+        },
+        Side::Black => {
+            if bitboard.is_empty_on_board_and_set(board, x, y - 1) && piece.pos[1] == 6 {
+                bitboard.is_empty_on_board_and_set(board, x, 4);
+            }
         }
     }
 

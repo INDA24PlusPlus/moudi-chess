@@ -41,3 +41,9 @@ impl From<char> for File {
         }
     }
 }
+
+impl From<u8> for File {
+    fn from(value: u8) -> Self {
+        Self::from(value as char)
+    }
+}

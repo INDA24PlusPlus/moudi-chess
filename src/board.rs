@@ -1,4 +1,5 @@
 use std::convert::From;
+use std::ops::RangeBounds;
 
 use crate::pieces::*;
 use crate::bitboard::{self, *};
@@ -6,7 +7,7 @@ use crate::file::*;
 
 const NUM_PIECES: usize = 6;
 
-#[derive(PartialEq, Eq, Copy, Clone)]
+#[derive(PartialEq, Eq, Copy, Clone, Debug)]
 pub enum Side {
     White,
     Black
@@ -30,12 +31,12 @@ impl CastlingAbility {
 
 pub struct Board {
     pieces: [ BitBoard; NUM_PIECES ], // piece placement
-    white: BitBoard, // placement of all white pieces
-    black: BitBoard, // placement of all black pieces
+    pub white: BitBoard, // placement of all white pieces
+    pub black: BitBoard, // placement of all black pieces
     side: Side, // side to move
     castling: [CastlingAbility; 2], // castling rights [0: white, 1: black]
-    ep_target: Option<u8>, // en passant target square
-    moves_to_50: u8, // halfmove clock
+    ep_target: Option<i8>, // en passant target square
+    moves_to_50: i8, // halfmove clock
     move_counter: u32 // fullmove clock
 }
 
@@ -59,7 +60,7 @@ impl Board {
         }
     }
 
-    pub fn move_piece(&mut self, piece: Piece, x: u8, y: u8) -> bool {
+    pub fn move_piece(&mut self, piece: Piece, x: i8, y: i8) -> bool {
         if !piece.attack(self, x, y) {
             return false;
         }
@@ -68,29 +69,40 @@ impl Board {
         let capture = self.get_piece_type_at_pos(x, y);
         if capture != PieceType::Empty {
             self.pieces[capture.to_value() as usize].set((y * 8 + x) as usize, false);
+            self.moves_to_50 = 0; // reset to 0 on capture
+        } else if piece.get_piece_type() == PieceType::Pawn {
+            self.moves_to_50 = 0; // reset if a pawn is moved
+        } else {
+            self.moves_to_50 += 1;
         }
+
         // move current piece to new slot
         self.pieces[piece.get_piece_type().to_value() as usize].set(piece.get_occupied_slot(), false);
         self.pieces[piece.get_piece_type().to_value() as usize].set((y * 8 + x) as usize, true);
 
-        return true;
+        if self.side == Side::Black {
+            self.move_counter += 1;
+        }
+
+        true
     }
 
-    pub fn get_piece_type_at_pos(&self, x: u8, y: u8) -> PieceType {
+    pub fn get_piece_type_at_pos(&self, x: i8, y: i8) -> PieceType {
+        println!("{},{}", x, y);
         if !self.all_pieces_bitboard().get(y * 8 + x) {
             return PieceType::Empty;
         }
 
         for (i, bitboard) in self.pieces.iter().enumerate() {
             if bitboard.get(y * 8 + x) {
-                return PieceType::from_value(i as u8);
+                return PieceType::from_value(i as i8);
             }
         }
 
         PieceType::Empty
     }
 
-    pub fn get_piece_at_pos(&mut self, x: u8, y: u8) -> Option<Piece> {
+    pub fn get_piece_at_pos(&self, x: i8, y: i8) -> Option<Piece> {
         let piecetype = self.get_piece_type_at_pos(x, y);
         
         if piecetype == PieceType::Empty {
@@ -103,14 +115,14 @@ impl Board {
         }, x, y))
     }
 
-    pub fn get_all_pieces(&mut self) -> Vec<Piece> {
+    pub fn get_all_pieces(&self) -> Vec<Piece> {
         (0..64).filter_map(|n| self.get_piece_at_pos(n % 8, n / 8)).collect::<Vec<_>>()
     }
 
-    pub fn get_opponent_board(&self, piece: &Piece) -> &BitBoard {
+    pub fn get_opponent_board(&self, piece: &Piece) -> BitBoard {
         match piece.get_color() {
-            Side::White => &self.black,
-            Side::Black => &self.white
+            Side::White => self.black,
+            Side::Black => self.white
         }
     }
 
@@ -122,11 +134,11 @@ impl Board {
     }
 
     #[inline]
-    pub fn is_inbounds(x: u8, y: u8) -> bool {
-        x < 8 && y < 8
+    pub fn is_inbounds(x: i8, y: i8) -> bool {
+        (0..8).contains(&x) && (0..8).contains(&y)
     }
 
-    pub fn is_empty(&self, x: u8, y: u8) -> bool {
+    pub fn is_empty(&self, x: i8, y: i8) -> bool {
         self.get_piece_type_at_pos(x, y) == PieceType::Empty
     }
 
@@ -139,16 +151,16 @@ impl Board {
             for c in line.chars() {
                 match c {
                     'p' => board.set_piece(file, rank, PieceType::Pawn, Side::Black),
-                    'P' => board.set_piece(file, rank, PieceType::Pawn, Side::White),
                     'n' => board.set_piece(file, rank, PieceType::Knight, Side::Black),
-                    'N' => board.set_piece(file, rank, PieceType::Knight, Side::White),
                     'b' => board.set_piece(file, rank, PieceType::Bishop, Side::Black),
-                    'B' => board.set_piece(file, rank, PieceType::Bishop, Side::White),
                     'r' => board.set_piece(file, rank, PieceType::Rook, Side::Black),
-                    'R' => board.set_piece(file, rank, PieceType::Rook, Side::White),
                     'q' => board.set_piece(file, rank, PieceType::Queen, Side::Black),
-                    'Q' => board.set_piece(file, rank, PieceType::Queen, Side::White),
                     'k' => board.set_piece(file, rank, PieceType::King, Side::Black),
+                    'P' => board.set_piece(file, rank, PieceType::Pawn, Side::White),
+                    'N' => board.set_piece(file, rank, PieceType::Knight, Side::White),
+                    'B' => board.set_piece(file, rank, PieceType::Bishop, Side::White),
+                    'R' => board.set_piece(file, rank, PieceType::Rook, Side::White),
+                    'Q' => board.set_piece(file, rank, PieceType::Queen, Side::White),
                     'K' => board.set_piece(file, rank, PieceType::King, Side::White),
                     '0'..='8' => file += c.to_digit(10).unwrap() as usize - 1,
                     _ => return Err(format!("Invalid FEN notation: {}", c)),
@@ -176,8 +188,8 @@ impl Board {
 
         if parts[3].len() != 1 {
             let chars : Vec<_> = parts[3].chars().collect();
-            let file = File::from(chars[0]) as u8;
-            let rank = chars[1].to_digit(10).unwrap() as u8;
+            let file = File::from(chars[0]) as i8;
+            let rank = chars[1].to_digit(10).unwrap() as i8;
             board.ep_target = Some(file + rank * 8)
         }
         
@@ -195,7 +207,7 @@ impl Board {
         };
     }
 
-    fn all_pieces_bitboard(&self) -> BitBoard {
-        self.white & self.black
+    pub fn all_pieces_bitboard(&self) -> BitBoard {
+        self.white | self.black
     }
 }
