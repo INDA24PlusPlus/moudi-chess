@@ -33,7 +33,7 @@ impl BitBoard {
     }
 
     pub fn is_empty_on_board_and_set(&mut self, board: &Board, x: i8, y: i8) -> bool {
-        self.predicate_and_set(x, y, |x, y| board.is_empty(x, y))
+        self.predicate_and_set(x, y, |x, y| board.is_empty(y * 8 + x))
     }
 
     pub fn compare_and_set(&mut self, compare: Self, compare_value: bool, x: i8, y: i8) -> bool {

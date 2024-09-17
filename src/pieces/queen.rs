@@ -3,8 +3,8 @@ use std::cmp::min;
 use crate::{bitboard, BitBoard};
 use super::{Board, Piece};
 
-pub fn is_allowed_move(piece: &Piece, board: &Board, x: i8, y: i8) -> bool {
-    get_all_moves(piece, board).get(y * 8 + x)
+pub fn is_allowed_move(piece: &Piece, board: &Board, index: i8) -> bool {
+    get_all_moves(piece, board).get(index)
 }
 
 pub fn get_all_moves(piece: &Piece, board: &Board) -> BitBoard {

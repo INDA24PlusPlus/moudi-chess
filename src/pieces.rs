@@ -60,14 +60,14 @@ impl Piece {
         }
     }
 
-    pub fn attack(&self, board: &Board, x: i8, y: i8) -> bool {
+    pub fn is_allowed_move(&self, board: &Board, index: i8) -> bool {
         match self.piece {
-            PieceType::Pawn => pawn::is_allowed_move(self, board, x, y),
-            PieceType::Knight => knight::is_allowed_move(self, x, y),
-            PieceType::Bishop => bishop::is_allowed_move(self, board, x, y),
-            PieceType::Rook => rook::is_allowed_move(self, board, x, y),
-            PieceType::Queen => queen::is_allowed_move(self, board, x, y),
-            PieceType::King => king::is_allowed_move(self, board, x, y),
+            PieceType::Pawn => pawn::is_allowed_move(self, board, index),
+            PieceType::Knight => knight::is_allowed_move(self, board, index),
+            PieceType::Bishop => bishop::is_allowed_move(self, board, index),
+            PieceType::Rook => rook::is_allowed_move(self, board, index),
+            PieceType::Queen => queen::is_allowed_move(self, board, index),
+            PieceType::King => king::is_allowed_move(self, board, index),
             _ => false
         }
     }
@@ -75,7 +75,7 @@ impl Piece {
     pub fn get_possible_moves(&self, board: &Board) -> BitBoard {
         match self.piece {
             PieceType::Pawn => pawn::get_all_moves(self, board),
-            PieceType::Knight => knight::get_all_moves(self),
+            PieceType::Knight => knight::get_all_moves(self, board),
             PieceType::Bishop => bishop::get_all_moves(self, board),
             PieceType::Rook => rook::get_all_moves(self, board),
             PieceType::Queen => queen::get_all_moves(self, board),
