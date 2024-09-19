@@ -21,28 +21,37 @@ impl BitBoard {
         self.set(y * 8 + x, value);
     }
 
-    pub fn predicate_and_set<F>(&mut self, x: i8, y: i8, predicate: F) -> bool 
-        where F: Fn(i8, i8) -> bool
+    pub fn predicate_and_set<F>(&mut self, x: usize, y: usize, predicate: F) -> bool
+        where F: Fn(usize, usize) -> bool
     {
         if Board::is_inbounds(x, y) && predicate(x, y) {
-            self.set(((y * 8) + x) as usize, true);
+            self.set((y * 8) + x, true);
             return true;
         }
 
         false
     }
 
-    pub fn is_empty_on_board_and_set(&mut self, board: &Board, x: i8, y: i8) -> bool {
+    pub fn is_empty_on_board_and_set(&mut self, board: &Board, x: usize, y: usize) -> bool {
         self.predicate_and_set(x, y, |x, y| board.is_empty(y * 8 + x))
     }
 
-    pub fn compare_and_set(&mut self, compare: Self, compare_value: bool, x: i8, y: i8) -> bool {
+    pub fn compare_and_set(&mut self, compare: Self, compare_value: bool, x: usize, y: usize) -> bool {
         self.predicate_and_set(x, y, |x, y| compare.get(y * 8 + x) == compare_value)
     }
-
-    pub fn get(&self, index: i8) -> bool {
+    
+    #[inline]
+    pub fn get(&self, index: usize) -> bool {
         debug_assert!(index >= 0);
         (self.0 & (1u64 << index)) != 0
+    }
+
+    pub fn to_number(&self) -> u64 {
+        self.0
+    }
+
+    pub fn clear(&mut self) {
+        self.0 = 0;
     }
 }
 

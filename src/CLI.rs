@@ -1,6 +1,6 @@
 use std::io::{self, Write};
 
-use crate::{Board, Chess, File};
+use crate::{Board, Chess, File, Side};
 
 pub fn start() {
     let mut chess = Chess::default();
@@ -31,17 +31,31 @@ pub fn start() {
                     println!("{}", piece.get_possible_moves(&chess.board));
                 }
             },
-            "white" => println!("{}", chess.board.white),
-            "black" => println!("{}", chess.board.black),
+            // "pinned" => {
+            //     match split[1] {
+            //         "white" | "w" => chess.board.calculate_pinned_pieces(Side::White),
+            //         "black" | "b" => chess.board.calculate_pinned_pieces(Side::Black),
+            //         _ => {}
+            //     }
+            // },
+            // "aa" => {
+            //     match split[1] {
+            //         "white" | "w" => chess.board.calculate_attacked(Side::White),
+            //         "black" | "b" => chess.board.calculate_attacked(Side::Black),
+            //         _ => {}
+            //     }
+            // }
+            "white" => chess.board.print_side(Side::White),
+            "black" => chess.board.print_side(Side::Black),
             _ => {}
         }
     }
 }
 
-pub fn notation_to_index(move_notation: &str) -> i8 {
+pub fn notation_to_index(move_notation: &str) -> usize {
     let lowercase = move_notation.to_lowercase();
     let mut chars = lowercase.chars();
     let file = (chars.next().unwrap() as u8) - b'a';
     let rank = (chars.next().unwrap() as u8) - b'1';
-    (rank * 8 + file) as i8
+    (rank * 8 + file) as usize
 }

@@ -1,6 +1,5 @@
 use core::fmt::Display;
-use std::{convert::Into};
-use crate::{bitboard, board::*, BitBoard, File};
+use crate::{bitboard, board::*, BitBoard};
 
 mod pawn;
 pub use pawn::*;
@@ -28,8 +27,8 @@ pub enum PieceType {
 }
 
 impl PieceType {
-    pub fn to_value(self) -> i8 {
-        (self as i8) - 1
+    pub fn to_value(self) -> usize {
+        (self as usize) - 1
     }
     
     pub fn from_value(value: i8) -> PieceType {
@@ -48,7 +47,7 @@ impl PieceType {
 pub struct Piece {
     piece: PieceType,
     color: Side,
-    pos: [i8; 2]
+    pos: (i8, i8)
 }
 
 impl Piece {
@@ -56,11 +55,11 @@ impl Piece {
         Piece {
             piece,
             color,
-            pos: [x, y]
+            pos: (x, y)
         }
     }
 
-    pub fn is_allowed_move(&self, board: &Board, index: i8) -> bool {
+    pub fn is_allowed_move(&self, board: &Board, index: usize) -> bool {
         match self.piece {
             PieceType::Pawn => pawn::is_allowed_move(self, board, index),
             PieceType::Knight => knight::is_allowed_move(self, board, index),
@@ -89,8 +88,12 @@ impl Piece {
     }
 
     pub fn get_occupied_slot(&self) -> usize {
-        (self.pos[1] * 8 + self.pos[0]) as usize
-   }
+        (self.pos.1 * 8 + self.pos.0) as usize
+    }
+
+    pub fn get_pos_as_usize(&self) -> (usize, usize) {
+        (self.pos.0 as usize, self.pos.1 as usize)
+    }
 
     pub fn get_color(&self) -> Side {
         self.color
@@ -99,7 +102,6 @@ impl Piece {
 
 impl Display for Piece {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{:?} {:?}({}{})", self.color, self.piece, ((self.pos[0] as u8) + b'A') as char, self.pos[1])
+        write!(f, "{:?} {:?}({}{})", self.color, self.piece, ((self.pos.0 as u8) + b'A') as char, self.pos.1 + 1)
     }
 }
-
