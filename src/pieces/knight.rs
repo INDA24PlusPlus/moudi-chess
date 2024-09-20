@@ -6,41 +6,46 @@ pub fn is_allowed_move(piece: &Piece, board: &Board, index: usize) -> bool {
 }
 
 pub fn get_all_moves(piece: &Piece, board: &Board) -> BitBoard {
-    let mut bitboard = bitboard::EMPTY;
     let side = board.get_sides_board(piece.get_color());
     let (x, y) = piece.get_pos_as_usize();
+    let mut list = vec![];
 
     // NORTH-LEFT
     if x >= 1 {
-        bitboard.predicate_and_set(x - 1, y + 2, |x, y| Board::is_inbounds(x, y) && !side.get(y * 8 + x));
+        list.push((x - 1, y + 2));
     }
     // NORTH-RIGHT
-    bitboard.predicate_and_set(x + 1, y + 2, |x, y| Board::is_inbounds(x, y) && !side.get(y * 8 + x));
+    list.push((x + 1, y + 2));
 
     // EAST-UP
-    bitboard.predicate_and_set(x + 2, y + 1, |x, y| Board::is_inbounds(x, y) && !side.get(y * 8 + x));
+    list.push((x + 2, y + 1));
+    
     // EAST-DOWN
     if y >= 1 {
-        bitboard.predicate_and_set(x + 2, y - 1, |x, y| Board::is_inbounds(x, y) && !side.get(y * 8 + x));
+        list.push((x + 2, y - 1));
     }
 
     // SOUTH-RIGHT
     if y >= 2 {
-        bitboard.predicate_and_set(x + 1, y - 2, |x, y| Board::is_inbounds(x, y) && !side.get(y * 8 + x));
+        list.push((x + 1, y - 2));
     }
+    
     // SOUTH-LEFT
     if x >= 1 && y >= 2 {
-        bitboard.predicate_and_set(x - 1, y - 2, |x, y| Board::is_inbounds(x, y) && !side.get(y * 8 + x));
+        list.push((x - 1, y - 2));
     }
     
     // WEST-DOWN
     if x >= 2 && y >= 1 {
-        bitboard.predicate_and_set(x - 2, y - 1, |x, y| Board::is_inbounds(x, y) && !side.get(y * 8 + x));
+        list.push((x - 2, y - 1));
     }
     // WEST-UP
     if x >= 2 {
-        bitboard.predicate_and_set(x - 2, y + 1, |x, y| Board::is_inbounds(x, y) && !side.get(y * 8 + x));
+        list.push((x - 2, y + 1));
     }
 
-    bitboard
+    board.check_and_set_piece_iter(piece, list.iter().map(|(x, y)| (*x, *y)), |bitboard, x, y| {
+        let _ = bitboard.compare_and_set(side, false, x, y);
+        false
+    })
 }

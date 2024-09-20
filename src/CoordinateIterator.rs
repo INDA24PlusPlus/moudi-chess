@@ -16,6 +16,10 @@ impl CoordinateIterator {
             dy: (end.1 as isize - start.1 as isize).signum(),
         }
     }
+
+    pub fn contains(&mut self, coord: (usize, usize)) -> bool {
+        self.find(|(x, y)| *x == coord.0 && *y == coord.1) != None
+    }
 }
 
 impl Iterator for CoordinateIterator {

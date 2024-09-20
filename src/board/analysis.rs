@@ -1,11 +1,6 @@
-use core::panic;
-use std::{borrow::BorrowMut, cmp::min, io::repeat};
+use crate::{bitboard, CoordinateIterator::CoordinateIterator};
 
-use crate::{dualboard, CoordinateIterator::CoordinateIterator};
-
-use crate::bitboard;
-
-use super::{BitBoard, Board, DualBoard, PieceType, Side, NUM_INDECES};
+use super::{BitBoard, Board, Piece, PieceType, Side};
 
 impl Board {
     
@@ -29,11 +24,8 @@ impl Board {
     pub fn calculate_pinned_pieces(&mut self, side: Side) {
         let sides_board = self.get_sides_board(side);
         let opponent = self.get_sides_board(side.get_opposite());
-        let king_board = sides_board & self.pieces[PieceType::King.to_value()];
-
-        assert!(king_board.to_number() != 0);
         
-        let king_index = (NUM_INDECES) - (king_board.to_number().leading_zeros() + 1) as usize; 
+        let king_index = self.get_king(side);
         let king_pos = (king_index % 8, king_index / 8);
 
         let mut pinned = bitboard::EMPTY;
@@ -64,21 +56,73 @@ impl Board {
     }
     
     pub fn calculate_attacked(&mut self, side: Side) {
-        let mut board = DualBoard::new();
+        let mut attacking = vec![];
+        let mut attacked = bitboard::EMPTY;
+        let king_index = self.get_king(side);
         let pieces = self.get_all_pieces();
 
         for piece in pieces {
-            if piece.get_color() != side  {
+            if piece.get_color() == side  {
                 continue;
             }
+
             let attack = piece.get_possible_moves(self);
-            board.add(attack);
+            if attack.get(king_index) {
+                attacking.push(piece);
+            }
+
+            attacked |= attack;
         }
 
         match side {
-            Side::White => self.white_moves = board,
-            Side::Black => self.black_moves = board,
+            Side::White => {
+                self.white_attacking_king = attacking;
+                self.white_attacked = attacked;
+            },
+            Side::Black => {
+                self.black_attacking_king = attacking;
+                self.black_attacked = attacked;
+            },
         }
+    }
+
+    // checks:
+    //  King is un-attacked
+    //  Piece is not pinned
+    //  King does not move to an attacked square
+    pub fn check_external_piece_test(&self, piece: &Piece, x: usize, y: usize) -> bool {
+        let (pinned, attacking, attacked) = self.get_side_computed_boards(piece.get_color());
+
+        let special = (x, y) == (3, 1);
+        
+        // if piece is pinned
+        if pinned.get(piece.get_occupied_slot()) {
+            return false;
+        } else if piece.get_piece_type() == PieceType::King {
+            // king moves to attacked square
+            if attacked.get(y * 8 + x) {
+                return false;
+            }
+        } else {
+            // king is attacked by more than two and trying to move another piece
+            if attacking.len() >= 2 {
+                return false;
+            } else if attacking.len() == 1 && !self.will_block_king_attack(piece, &attacking[0], x, y) {
+                return false;
+            }
+        }
+
+        true
+    }
+
+    fn will_block_king_attack(&self, piece: &Piece, attacking_piece: &Piece, x: usize, y: usize) -> bool {
+        match piece.get_piece_type() {
+            PieceType::Pawn | PieceType::Knight => return false,
+            _ => {}
+        }
+
+        let king_index = self.get_king(piece.get_color());
+        CoordinateIterator::new(attacking_piece.get_pos_as_usize(), (king_index % 8, king_index / 8)).contains((x, y))
     }
 
 }

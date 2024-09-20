@@ -31,20 +31,20 @@ pub fn start() {
                     println!("{}", piece.get_possible_moves(&chess.board));
                 }
             },
-            // "pinned" => {
-            //     match split[1] {
-            //         "white" | "w" => chess.board.calculate_pinned_pieces(Side::White),
-            //         "black" | "b" => chess.board.calculate_pinned_pieces(Side::Black),
-            //         _ => {}
-            //     }
-            // },
-            // "aa" => {
-            //     match split[1] {
-            //         "white" | "w" => chess.board.calculate_attacked(Side::White),
-            //         "black" | "b" => chess.board.calculate_attacked(Side::Black),
-            //         _ => {}
-            //     }
-            // }
+            "pinned" => {
+                match split[1] {
+                    "white" | "w" => println!("{}", chess.board.get_side_computed_boards(Side::White).0),
+                    "black" | "b" => println!("{}", chess.board.get_side_computed_boards(Side::White).0),
+                    _ => {}
+                }
+            },
+            "aa" => {
+                match split[1] {
+                    "white" | "w" => println!("{}", chess.board.get_side_computed_boards(Side::White).2),
+                    "black" | "b" => println!("{}", chess.board.get_side_computed_boards(Side::Black).2),
+                    _ => {}
+                }
+            }
             "white" => chess.board.print_side(Side::White),
             "black" => chess.board.print_side(Side::Black),
             _ => {}

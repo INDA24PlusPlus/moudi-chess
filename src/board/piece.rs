@@ -1,6 +1,6 @@
-use std::{collections::btree_map::IterMut, iter::FilterMap, path::Iter};
+use crate::bitboard;
 
-use super::{Board, Piece, PieceType, Side, NUM_INDECES};
+use super::{BitBoard, Board, Piece, PieceType, Side, NUM_INDECES};
 
 impl Board {
     pub fn move_piece(&mut self, piece: &Piece, index: usize) -> bool {
@@ -18,7 +18,6 @@ impl Board {
         
         // swtich the active playing side here so that we can use that in the discarding of the
         // captured piece
-        self.side = self.side.get_opposite();
 
         // remove captured piece
         let capture_type = self.get_piece_type_at_pos(index);
@@ -40,6 +39,10 @@ impl Board {
             self.move_counter += 1;
         }
 
+        // recalculate attacked pieces for checkmate test
+        self.calculate_attacked(self.side);
+        // switch side so that it's the next players turn
+        self.side = self.side.get_opposite();
         self.calculate_attacked(self.side);
         self.calculate_pinned_pieces(self.side);
 
@@ -85,5 +88,26 @@ impl Board {
         if ((piece.get_occupied_slot() as i8) - new_index).abs() == 16 {
             self.ep_target = Some(new_index);
         }
+    }
+
+    pub fn get_king(&self, side: Side) -> usize {
+        let king_board = self.get_sides_board(side) & self.pieces[PieceType::King.to_value()];
+
+        assert!(king_board.to_number() != 0);
+        
+        return (NUM_INDECES) - (king_board.to_number().leading_zeros() + 1) as usize;
+    }
+
+    pub fn check_and_set_piece_iter<F>(&self, piece: &Piece, moves: impl Iterator<Item = (usize, usize)>, action: F) -> BitBoard 
+        where F: Fn(&mut BitBoard, usize, usize) -> bool
+    {
+        let mut board = bitboard::EMPTY;
+        for (x, y) in moves {
+            if Board::is_inbounds(x, y) && self.check_external_piece_test(piece, x, y) && action(&mut board, x, y) {
+                break;
+            }
+        }
+
+        board
     }
 }

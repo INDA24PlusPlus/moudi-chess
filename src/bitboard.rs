@@ -42,7 +42,7 @@ impl BitBoard {
     
     #[inline]
     pub fn get(&self, index: usize) -> bool {
-        debug_assert!(index >= 0);
+        debug_assert!(index < 64);
         (self.0 & (1u64 << index)) != 0
     }
 

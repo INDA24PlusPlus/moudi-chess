@@ -2,7 +2,6 @@ use std::convert::From;
 
 use crate::pieces::*;
 use crate::bitboard::{self, *};
-use crate::dualboard::*;
 use crate::file::*;
 
 mod piece;
@@ -53,10 +52,12 @@ pub struct Board {
     moves_to_50: i8,    // halfmove clock
     move_counter: u32,  // fullmove clock
 
-    white_moves: DualBoard, // all white moves
-    black_moves: DualBoard, // all black moves
-    white_pinned: BitBoard, // pinned white
-    black_pinned: BitBoard  // pinned black
+    white_attacking_king: Vec<Piece>, // all black pieces attacking white king
+    black_attacking_king: Vec<Piece>, // all white pieces attacking black king
+    white_attacked: BitBoard,   // all slots that are attacked by black
+    black_attacked: BitBoard,   // all slots that are attacked by white
+    white_pinned: BitBoard, // pinned white pieces
+    black_pinned: BitBoard  // pinned black pieces
 }
 
 impl Default for Board {
@@ -77,8 +78,10 @@ impl Board {
             moves_to_50: 0,
             move_counter: 0,
 
-            white_moves: DualBoard::new(),
-            black_moves: DualBoard::new(),
+            white_attacking_king: vec![],
+            black_attacking_king: vec![],
+            white_attacked: bitboard::EMPTY,
+            black_attacked: bitboard::EMPTY,
             white_pinned: bitboard::EMPTY,
             black_pinned: bitboard::EMPTY,
         }
@@ -155,6 +158,13 @@ impl Board {
 
     pub fn get_ep_target(&self) -> Option<i8> {
         self.ep_target
+    }
+
+    pub fn get_side_computed_boards(&self, side: Side) -> (BitBoard, &Vec<Piece>, BitBoard) {
+        match side {
+            Side::White => (self.white_pinned, &self.white_attacking_king, self.white_attacked),
+            Side::Black => (self.black_pinned, &self.black_attacking_king, self.black_attacked)
+        }
     }
 
     fn take_en_passant(&mut self, piece: &Piece, ep_index: i8) {
