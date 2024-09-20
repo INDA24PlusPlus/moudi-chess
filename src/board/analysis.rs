@@ -92,9 +92,7 @@ impl Board {
     //  King does not move to an attacked square
     pub fn check_external_piece_test(&self, piece: &Piece, x: usize, y: usize) -> bool {
         let (pinned, attacking, attacked) = self.get_side_computed_boards(piece.get_color());
-
-        let special = (x, y) == (3, 1);
-        
+ 
         // if piece is pinned
         if pinned.get(piece.get_occupied_slot()) {
             return false;
@@ -102,6 +100,10 @@ impl Board {
             // king moves to attacked square
             if attacked.get(y * 8 + x) {
                 return false;
+            }
+            // if taking this piece results in being attacked
+            else {
+
             }
         } else {
             // king is attacked by more than two and trying to move another piece

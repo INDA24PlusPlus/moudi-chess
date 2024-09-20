@@ -1,4 +1,4 @@
-use crate::Board;
+use crate::{Board, Piece};
 
 pub struct Chess {
     pub board: Board,
@@ -6,7 +6,7 @@ pub struct Chess {
 }
 
 #[derive(Copy, Clone)]
-enum State {
+pub enum State {
     Playing,
     Check,
     CheckMate,
@@ -42,8 +42,14 @@ impl Chess {
                 } else {
                     self.state = State::Check;
                 }
+            } else if self.board.get_side_computed_boards(piece.get_color()).2.to_number() == 0 {
+                self.state = State::Stalemate;
             }
         }
+    }
+
+    pub fn get_all_pieces(&self) -> Vec<Piece> {
+        self.board.get_all_pieces()
     }
 
     pub fn get_state(&self) -> State {
