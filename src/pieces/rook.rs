@@ -1,5 +1,4 @@
-use crate::{BitBoard};
-use crate::CoordinateIterator::*;
+use crate::{BitBoard, CoordinateIterator};
 use super::{Board, Piece};
 
 pub fn is_allowed_move(piece: &Piece, board: &Board, index: usize) -> bool {

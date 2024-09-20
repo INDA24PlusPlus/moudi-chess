@@ -1,3 +1,4 @@
+use core::panic;
 use std::convert::From;
 
 use crate::pieces::*;
@@ -26,7 +27,8 @@ impl Side {
     }
 }
 
-enum CastlingAbility {
+#[derive(PartialEq, Eq, Clone, Copy)]
+pub enum CastlingAbility {
     None,
     King,
     Queen,
@@ -39,6 +41,30 @@ impl CastlingAbility {
             CastlingAbility::None => rhs,
             _ => CastlingAbility::Both
         };
+    }
+
+    fn inverse(&self) -> CastlingAbility {
+        match *self {
+            CastlingAbility::King => CastlingAbility::Queen,
+            CastlingAbility::Queen => CastlingAbility::King,
+            _ => panic!("Unable to inverse none or both castling ability"),
+        }
+    }
+
+    pub fn remove(&mut self, castling_side: CastlingAbility) {
+        match *self {
+            CastlingAbility::None => *self = CastlingAbility::None,
+            CastlingAbility::Both => *self = castling_side.inverse(),
+            _ => {
+                if castling_side == *self {
+                    *self = CastlingAbility::None;
+                }
+            }
+        }
+    }
+
+    pub fn has(&self, castling: CastlingAbility) -> bool {
+        *self == CastlingAbility::Both || *self == castling
     }
 }
 
@@ -158,6 +184,21 @@ impl Board {
 
     pub fn get_ep_target(&self) -> Option<i8> {
         self.ep_target
+    }
+
+    pub fn get_playing_side(&self) -> Side {
+        self.side
+    }
+
+    pub fn get_castling(&self, side: Side) -> CastlingAbility {
+        match side {
+            Side::White => self.castling[0],
+            Side::Black => self.castling[1],
+        }
+    }
+
+    pub fn get_combined_piece_board(&self) -> BitBoard {
+        self.white | self.black
     }
 
     pub fn get_side_computed_boards(&self, side: Side) -> (BitBoard, &Vec<Piece>, BitBoard) {

@@ -10,8 +10,8 @@ pub use crate::pieces::*;
 mod bitboard;
 pub use crate::bitboard::*;
 
-mod CoordinateIterator;
-use crate::CoordinateIterator::*;
+mod coordinateiterator;
+use crate::coordinateiterator::*;
 
 mod file;
 pub use crate::file::*;

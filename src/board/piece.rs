@@ -1,6 +1,6 @@
 use crate::bitboard;
 
-use super::{BitBoard, Board, Piece, PieceType, Side, NUM_INDECES};
+use super::{BitBoard, Board, CastlingAbility, Piece, PieceType, Side, NUM_INDECES};
 
 impl Board {
     pub fn move_piece(&mut self, piece: &Piece, index: usize) -> bool {
@@ -22,7 +22,7 @@ impl Board {
         // remove captured piece
         let capture_type = self.get_piece_type_at_pos(index);
         if capture_type != PieceType::Empty {
-            self.set_piece(index as usize, capture_type, piece.get_color().get_opposite(), false);
+            self.set_piece(index, capture_type, piece.get_color().get_opposite(), false);
             self.moves_to_50 = 0; // reset to 0 on capture
         } else if piece.get_piece_type() == PieceType::Pawn {
             self.encode_en_passant(&piece, index as i8);
@@ -33,18 +33,28 @@ impl Board {
 
         // move current piece to new index
         self.set_piece(piece.get_occupied_slot(), piece.get_piece_type(), piece.get_color(), false);
-        self.set_piece(index as usize, piece.get_piece_type(), piece.get_color(), true);
+        self.set_piece(index, piece.get_piece_type(), piece.get_color(), true);
 
+        // castling 
+        if piece.get_piece_type() == PieceType::King && index.abs_diff(piece.get_occupied_slot()) == 2 {
+            let (rook_offset, rook_x): (i8, usize) = match (index as i8 - piece.get_occupied_slot() as i8).signum() {
+                1 => (-1, 7),
+                -1 => (1, 0),
+                _ => (0, 0),
+            };
+            if rook_offset != 0 {
+                self.set_piece((index / 8) * 8 + rook_x, PieceType::Rook, piece.get_color(), false);
+                self.set_piece((index as i8 + rook_offset) as usize, PieceType::Rook, piece.get_color(), true);
+            }
+        }
+
+        self.update_castling_ability(piece);
+        
         if self.side == Side::Black {
             self.move_counter += 1;
         }
-
-        // recalculate attacked pieces for checkmate test
-        self.calculate_attacked(self.side);
-        // switch side so that it's the next players turn
-        self.side = self.side.get_opposite();
-        self.calculate_attacked(self.side);
-        self.calculate_pinned_pieces(self.side);
+        
+        self.update_calculations();
 
         true
     }
@@ -109,5 +119,41 @@ impl Board {
         }
 
         board
+    }
+
+    pub fn update_calculations(&mut self) {
+        // recalculate attacked pieces for checkmate test
+        self.calculate_attacked(self.side);
+        // switch side so that it's the next players turn
+        self.side = self.side.get_opposite();
+        self.calculate_attacked(self.side);
+        self.calculate_pinned_pieces(self.side);
+    }
+
+    fn update_castling_ability(&mut self, piece: &Piece) {
+        let color = match piece.get_color() {
+            Side::White => 0,
+            Side::Black => 1,
+        };
+
+        match piece.get_piece_type() {
+            PieceType::King => {
+                self.castling[color] = CastlingAbility::None;
+            },
+            PieceType::Rook => {
+                if self.castling[color] != CastlingAbility::None {
+                    return;
+                }
+
+                match piece.get_pos_as_usize().0 {
+                    0 => self.castling[color].remove(CastlingAbility::King),
+                    7 => self.castling[color].remove(CastlingAbility::Queen),
+                    _ => {}
+                }
+            },
+            _ => {}
+        }
+        
+
     }
 }

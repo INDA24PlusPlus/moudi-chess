@@ -1,4 +1,4 @@
-use crate::{bitboard, CoordinateIterator::CoordinateIterator};
+use crate::{bitboard, CoordinateIterator};
 
 use super::{BitBoard, Board, Piece, PieceType, Side};
 
