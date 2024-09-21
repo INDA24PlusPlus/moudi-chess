@@ -49,6 +49,8 @@ pub fn start() {
             }
             "white" => chess.board.print_side(Side::White),
             "black" => chess.board.print_side(Side::Black),
+            "state" => println!("{:?}", chess.get_state()),
+            "turn" => println!("{:?}", chess.board.get_playing_side()),
             _ => {}
         }
 

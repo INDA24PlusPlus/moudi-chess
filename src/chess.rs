@@ -9,7 +9,7 @@ pub struct Chess {
     promoting_index: Option<usize>
 }
 
-#[derive(Copy, Clone, Eq, PartialEq)]
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
 /// Special moments in the game
 ///
 /// State is used to differentiate between neccessary key moments on the board
@@ -37,7 +37,7 @@ impl Default for Chess {
 }
 
 impl Chess {
-    /// Create a new chess game
+    /// Create a new chess game starting from the default board position
     pub fn new() -> Chess {
         Chess {
             board: Board::default(),
@@ -46,11 +46,23 @@ impl Chess {
         }
     }
 
+    /// Create a new chess game but start from a specific board position
+    pub fn from_fen(fen: String) -> Chess {
+        let mut chess = Chess {
+            board: Board::from_fen(fen).unwrap(),
+            state: State::Playing,
+            promoting_index: None
+        };
+        chess.update_state();
+
+        chess
+    }
+
     /// Check if a piece at index is selectable
     ///
     /// # Example:
     /// ```
-    /// let chess = Chess::new();
+    /// let mut chess = Chess::new();
     /// let user_clicked_index = 4;
     /// if !chess.is_selectable(user_clicked_index) {
     ///     panic!("User can not choose this index");
@@ -66,7 +78,7 @@ impl Chess {
     ///
     /// # Example:
     /// ```
-    /// let chess = Chess::new();
+    /// let mut chess = Chess::new();
     /// let d2 = 1 * 8 + 3;
     /// let d4 = 3 * 8 + 3;
     /// chess.make_move(d2, d4);
@@ -77,15 +89,16 @@ impl Chess {
         }
 
         if let Some(piece) = self.board.get_piece_at_pos(start_index) {
-            self.board.move_piece(&piece, end_index);
+            if !self.board.move_piece(&piece, end_index) {
+                return false;
+            }
 
             let y = end_index / 8;
             if piece.get_piece_type() == PieceType::Pawn && (y == 0 || y == 7) {
                 self.promoting_index = Some(end_index);
-            } else {
-                self.update_state();
             }
 
+            self.update_state();
             return true;
         }
 
@@ -105,16 +118,16 @@ impl Chess {
     fn update_state(&mut self) {
         if self.promoting_index != None {
             self.state = State::Promotion;
-        } else if self.board.get_side_computed_boards(self.board.get_playing_side().get_opposite()).1.len() != 0 {
-            if self.board.get_side_computed_boards(self.board.get_playing_side()).2.to_number() == 0 {
+        } else if self.board.get_side_computed_boards(self.board.get_playing_side()).1.len() != 0 { 
+            if self.board.is_no_possible_moves(self.board.get_playing_side()) {
                 self.state = State::Checkmate;
             } else {
                 self.state = State::Check;
             }
-        } else if self.board.get_side_computed_boards(self.board.get_playing_side()).2.to_number() == 0 {
-            self.state = State::Stalemate;
         } else if self.board.is_only_kings_left() {
             self.state = State::Draw;
+        } else if self.board.is_no_possible_moves(self.board.get_playing_side()) {
+            self.state = State::Stalemate;
         } else {
             self.state = State::Playing;
         }
@@ -124,7 +137,7 @@ impl Chess {
     ///
     /// # Example:
     /// ```
-    /// let chess = Chess::new();
+    /// let mut chess = Chess::new();
     /// let b7 = 6 * 8 + 1;
     /// let b8 = 7 * 8 + 1;
     /// chess.make_move(b7, b8);
@@ -135,11 +148,11 @@ impl Chess {
     pub fn promote(&mut self, new_piece: PieceType) {
         if let Some(index) = self.promoting_index {
             let color = self.board.get_playing_side().get_opposite();
-            self.board.set_piece(index, PieceType::Rook, color, false);
+            self.board.set_piece(index, PieceType::Pawn, color, false);
             self.board.set_piece(index, new_piece, color, true);
 
-            self.board.update_calculations();
             self.promoting_index = None;
+            self.board.update_calculations();
             self.update_state();
         }
     }
@@ -149,7 +162,7 @@ impl Chess {
     /// # Example:
     /// Print all pieces
     /// ```
-    /// let chess = Chess::new();
+    /// let mut chess = Chess::new();
     /// // do something
     /// for piece in chess.get_all_pieces() {
     ///     println!("{}", piece);
@@ -163,7 +176,7 @@ impl Chess {
     ///
     /// # Example:
     /// ```
-    /// let chess = Chess::new();
+    /// let mut chess = Chess::new();
     /// // do something
     /// while chess.get_state() == State::Playing {
     ///     // do something

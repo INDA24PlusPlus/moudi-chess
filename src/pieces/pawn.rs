@@ -1,4 +1,4 @@
-use crate::{bitboard, BitBoard};
+use crate::{bitboard, BitBoard, CoordinateIterator};
 use super::{Board, Piece, Side};
 
 pub(crate) fn is_allowed_move(piece: &Piece, board: &Board, index: usize) -> bool {
@@ -10,23 +10,16 @@ pub(crate) fn get_all_moves(piece: &Piece, board: &Board) -> BitBoard {
 }
 
 fn get_move_bitboard(piece: &Piece, board: &Board) -> BitBoard {
-    let mut bitboard = bitboard::EMPTY;
     let (x, y) = piece.get_pos_as_usize();
+    let end = match piece.color {
+        Side::White => (x, if y == 1 {3} else {y + 1}),
+        Side::Black => (x, if y == 6 {4} else {y - 1}),
+    };
 
-    match piece.color {
-        Side::White => {
-            if Board::is_inbounds(x, y + 1) && bitboard.is_empty_on_board_and_set(board, x, y + 1) && y == 1 {
-                bitboard.is_empty_on_board_and_set(board, x, 3);
-            }
-        },
-        Side::Black => {
-            if Board::is_inbounds(x, y - 1) && bitboard.is_empty_on_board_and_set(board, x, y - 1) && y == 6 {
-                bitboard.is_empty_on_board_and_set(board, x, 4);
-            }
-        }
-    }
-
-    bitboard
+    board.check_and_set_piece_iter(piece, CoordinateIterator::new(piece.get_pos_as_usize(), end), 
+        |bitboard: &mut BitBoard, x, y| {
+            !bitboard.is_empty_on_board_and_set(board, x, y)
+        })
 }
 
 pub(crate) fn get_attack_bitboard(piece: &Piece, board: &Board) -> BitBoard {

@@ -55,7 +55,7 @@ impl Board {
         }
     }
     
-    pub(crate) fn calculate_attacked(&mut self, side: Side) {
+    pub(crate) fn calculate_attacking_and_attacked(&mut self, side: Side) {
         let mut attacking = vec![];
         let mut attacked = bitboard::EMPTY;
         let king_index = self.get_king(side);
@@ -90,15 +90,11 @@ impl Board {
         }
     }
 
-    // checks:
-    //  King is un-attacked
-    //  Piece is not pinned
-    //  King does not move to an attacked square
-    pub(crate) fn check_external_piece_test(&self, piece: &Piece, x: usize, y: usize) -> bool {
+    pub(crate) fn is_king_safety(&self, piece: &Piece, x: usize, y: usize) -> bool {
         let (pinned, attacking, attacked) = self.get_side_computed_boards(piece.get_color());
  
         // if piece is pinned
-        if pinned.get(piece.get_occupied_slot()) {
+        if pinned.get(piece.get_occupied_slot()) && !self.still_pinned_piece_at_pos(piece, x, y) {
             return false;
         } else if piece.get_piece_type() == PieceType::King {
             // king moves to attacked square
@@ -108,7 +104,7 @@ impl Board {
             // if taking this piece results in being attacked
             if let Some(capturing_piece) = self.get_piece_at_pos(y * 8 + x) {
                 // if piece is not same color
-                if capturing_piece.get_color() != piece.get_color() && self.is_protected(&capturing_piece) {
+                if capturing_piece.get_color() != piece.get_color() && self.is_guarded_piece(&capturing_piece) {
                     return false;
                 }
             }
@@ -117,7 +113,7 @@ impl Board {
             if attacking.len() >= 2 {
                 return false;
             }
-            if attacking.len() == 1 && !self.will_block_king_attack(piece, &attacking[0], x, y) {
+            if attacking.len() == 1 && !self.will_block_or_capture_king_attack(piece, &attacking[0], x, y) {
                 return false;
             }
         }
@@ -125,17 +121,20 @@ impl Board {
         true
     }
 
-    fn will_block_king_attack(&self, piece: &Piece, attacking_piece: &Piece, x: usize, y: usize) -> bool {
-        match piece.get_piece_type() {
+    fn will_block_or_capture_king_attack(&self, piece: &Piece, attacking_piece: &Piece, x: usize, y: usize) -> bool {
+        match attacking_piece.get_piece_type() {
             PieceType::Pawn | PieceType::Knight => return false,
             _ => {}
+        }
+        if y * 8 + x == attacking_piece.get_occupied_slot() {
+            return true;
         }
 
         let king_index = self.get_king(piece.get_color());
         CoordinateIterator::new(attacking_piece.get_pos_as_usize(), (king_index % 8, king_index / 8)).contains((x, y))
     }
 
-    fn is_protected(&self, piece: &Piece) -> bool {
+    fn is_guarded_piece(&self, piece: &Piece) -> bool {
         let mut board = Board {
             pieces: self.pieces.clone(),
             white: self.white.clone(),
@@ -154,14 +153,47 @@ impl Board {
             black_pinned: bitboard::EMPTY,
         };
 
-        board.set_piece(piece.get_occupied_slot(), piece.get_piece_type(), piece.get_color(), false);
-        board.calculate_attacked(piece.get_color().get_opposite());
+        let index = piece.get_occupied_slot();
+        let side = piece.get_color();
+        // remove the piece from the board so we can do a get_possible_move and check if that index
+        // is a possible move
+        board.set_piece(index, piece.get_piece_type(), piece.get_color(), false);
 
-        match piece.get_color().get_opposite() {
-            Side::White => board.white_attacked,
-            Side::Black => board.black_attacked,
-        }.get(piece.get_occupied_slot())
+        for protecting_piece in board.get_all_pieces() {
+            if protecting_piece.get_color() != side {
+                continue;
+            }
 
+            let attack = match protecting_piece.get_piece_type() {
+                PieceType::Pawn => crate::pieces::pawn::get_attack_bitboard(&protecting_piece, &board),
+                _ => protecting_piece.get_possible_moves(&board),
+            };
+
+            if attack.get(index) {
+                return true;
+            }
+        }
+
+        false
+    }
+
+    pub(crate) fn is_no_possible_moves(&self, side: Side) -> bool {
+
+        for piece in self.get_all_pieces() {
+            if piece.get_color() == side && piece.get_possible_moves(self).to_number() != 0 {
+                return false;
+            }
+        }
+
+        true
+    }
+
+    pub(crate) fn still_pinned_piece_at_pos(&self, piece: &Piece, x: usize, y: usize) -> bool {
+        let king_index = self.get_king(piece.get_color());
+        let piece_movement = CoordinateIterator::new(piece.get_pos_as_usize(), (x, y)).get_change();
+        let king_to_piece = CoordinateIterator::new((king_index % 8, king_index / 8), piece.get_pos_as_usize()).get_change();
+
+        piece_movement == king_to_piece || (piece_movement.0 == -king_to_piece.0 && piece_movement.1 == -king_to_piece.1)
     }
 
 }

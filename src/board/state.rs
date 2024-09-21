@@ -3,10 +3,10 @@ use crate::{Board, Piece, Side, CastlingAbility, PieceType};
 impl Board {
     pub(crate) fn update_calculations(&mut self) {
         // recalculate attacked pieces for checkmate test
-        self.calculate_attacked(self.side);
+        self.calculate_attacking_and_attacked(self.side);
         // switch side so that it's the next players turn
         self.side = self.side.get_opposite();
-        self.calculate_attacked(self.side);
+        self.calculate_attacking_and_attacked(self.side);
         self.calculate_pinned_pieces(self.side);
     }
 

@@ -20,6 +20,10 @@ impl CoordinateIterator {
     pub fn contains(&mut self, coord: (usize, usize)) -> bool {
         self.find(|(x, y)| *x == coord.0 && *y == coord.1) != None
     }
+
+    pub fn get_change(&self) -> (isize, isize) {
+        (self.dx, self.dy)
+    }
 }
 
 impl Iterator for CoordinateIterator {

@@ -107,7 +107,9 @@ impl Board {
     {
         let mut board = bitboard::EMPTY;
         for (x, y) in moves {
-            if Board::is_inbounds(x, y) && self.check_external_piece_test(piece, x, y) && action(&mut board, x, y) {
+            if !Board::is_inbounds(x, y) || !self.is_king_safety(piece, x, y) {
+                continue
+            } else if action(&mut board, x, y) {
                 break;
             }
         }
