@@ -105,6 +105,17 @@ impl Chess {
         false
     }
 
+    /// Get a vector of all coordinates that a certain piece at index is able to move to
+    ///
+    /// # Example:
+    /// ```
+    /// let mut chess = Chess::new();
+    /// let d2 = 8 * 1 + 3;
+    /// println!("Piece at d2 can move to:");
+    /// for (x, y) in chess.get_moves(d2) {
+    ///     println!("\t({}, {})", x, y);
+    /// }
+    /// ```
     pub fn get_moves(&self, index: usize) -> Vec<(usize, usize)> {
         let mut moves = vec![];
 
