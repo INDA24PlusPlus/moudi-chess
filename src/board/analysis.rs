@@ -7,21 +7,21 @@ impl Board {
     fn add_pinned(&self, pinned: &mut BitBoard, it: CoordinateIterator, opponent_pinner: BitBoard, sides_board: BitBoard) {
         let board = self.all_pieces_bitboard();
         let mut first_piece_index = 65;
+
         for (x, y) in it {
             let index = y * 8 + x;
-            if !board.get(index) {
-                continue;
-            } else if first_piece_index == 65 && sides_board.get(index) {
+
+            if !board.get(index) {}
+            else if first_piece_index == 65 && sides_board.get(index) {
                 first_piece_index = index as usize;
-                continue;
-            } if first_piece_index != 65 && opponent_pinner.get(index) {
+            } else if first_piece_index != 65 && opponent_pinner.get(index) {
                 pinned.set(first_piece_index, true);
-                return;
+                break;
             }
         }
     }
 
-    pub fn calculate_pinned_pieces(&mut self, side: Side) {
+    pub(crate) fn calculate_pinned_pieces(&mut self, side: Side) {
         let sides_board = self.get_sides_board(side);
         let opponent = self.get_sides_board(side.get_opposite());
         
@@ -55,7 +55,7 @@ impl Board {
         }
     }
     
-    pub fn calculate_attacked(&mut self, side: Side) {
+    pub(crate) fn calculate_attacked(&mut self, side: Side) {
         let mut attacking = vec![];
         let mut attacked = bitboard::EMPTY;
         let king_index = self.get_king(side);
@@ -66,7 +66,11 @@ impl Board {
                 continue;
             }
 
-            let attack = piece.get_possible_moves(self);
+            let attack = match piece.get_piece_type() {
+                PieceType::Pawn => crate::pieces::pawn::get_attack_bitboard(&piece, self),
+                _ => piece.get_possible_moves(self),
+            };
+
             if attack.get(king_index) {
                 attacking.push(piece);
             }
@@ -90,7 +94,7 @@ impl Board {
     //  King is un-attacked
     //  Piece is not pinned
     //  King does not move to an attacked square
-    pub fn check_external_piece_test(&self, piece: &Piece, x: usize, y: usize) -> bool {
+    pub(crate) fn check_external_piece_test(&self, piece: &Piece, x: usize, y: usize) -> bool {
         let (pinned, attacking, attacked) = self.get_side_computed_boards(piece.get_color());
  
         // if piece is pinned
@@ -102,14 +106,18 @@ impl Board {
                 return false;
             }
             // if taking this piece results in being attacked
-            else {
-
+            if let Some(capturing_piece) = self.get_piece_at_pos(y * 8 + x) {
+                // if piece is not same color
+                if capturing_piece.get_color() != piece.get_color() && self.is_protected(&capturing_piece) {
+                    return false;
+                }
             }
         } else {
             // king is attacked by more than two and trying to move another piece
             if attacking.len() >= 2 {
                 return false;
-            } else if attacking.len() == 1 && !self.will_block_king_attack(piece, &attacking[0], x, y) {
+            }
+            if attacking.len() == 1 && !self.will_block_king_attack(piece, &attacking[0], x, y) {
                 return false;
             }
         }
@@ -125,6 +133,35 @@ impl Board {
 
         let king_index = self.get_king(piece.get_color());
         CoordinateIterator::new(attacking_piece.get_pos_as_usize(), (king_index % 8, king_index / 8)).contains((x, y))
+    }
+
+    fn is_protected(&self, piece: &Piece) -> bool {
+        let mut board = Board {
+            pieces: self.pieces.clone(),
+            white: self.white.clone(),
+            black: self.black.clone(),
+            side: self.side.clone(),
+            castling: self.castling.clone(),
+            ep_target: self.ep_target.clone(),
+            moves_to_50: 0,
+            move_counter: 0,
+
+            white_attacking_king: vec![],
+            black_attacking_king: vec![],
+            white_attacked: bitboard::EMPTY,
+            black_attacked: bitboard::EMPTY,
+            white_pinned: bitboard::EMPTY,
+            black_pinned: bitboard::EMPTY,
+        };
+
+        board.set_piece(piece.get_occupied_slot(), piece.get_piece_type(), piece.get_color(), false);
+        board.calculate_attacked(piece.get_color().get_opposite());
+
+        match piece.get_color().get_opposite() {
+            Side::White => board.white_attacked,
+            Side::Black => board.black_attacked,
+        }.get(piece.get_occupied_slot())
+
     }
 
 }

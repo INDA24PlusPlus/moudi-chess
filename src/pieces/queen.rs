@@ -1,11 +1,11 @@
 use crate::{bitboard, BitBoard, CoordinateIterator};
 use super::{Board, Piece};
 
-pub fn is_allowed_move(piece: &Piece, board: &Board, index: usize) -> bool {
+pub(crate) fn is_allowed_move(piece: &Piece, board: &Board, index: usize) -> bool {
     get_all_moves(piece, board).get(index)
 }
 
-pub fn get_all_moves(piece: &Piece, board: &Board) -> BitBoard {
+pub(crate) fn get_all_moves(piece: &Piece, board: &Board) -> BitBoard {
     let opponent = board.get_opponent_board(piece);
     let pos = piece.get_pos_as_usize();
 

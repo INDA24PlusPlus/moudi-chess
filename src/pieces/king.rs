@@ -1,11 +1,11 @@
 use crate::{bitboard, BitBoard, CoordinateIterator,};
 use super::{Board, CastlingAbility, Piece};
 
-pub fn is_allowed_move(piece: &Piece, board: &Board, index: usize) -> bool {
+pub(crate) fn is_allowed_move(piece: &Piece, board: &Board, index: usize) -> bool {
     get_all_moves(piece, board).get(index)
 }
 
-pub fn get_all_moves(piece: &Piece, board: &Board) -> BitBoard {
+pub(crate) fn get_all_moves(piece: &Piece, board: &Board) -> BitBoard {
     let opponent = board.get_opponent_board(piece);
     let (x, y) = piece.get_pos_as_usize();
     let mut list = vec![];
@@ -45,7 +45,6 @@ pub fn get_all_moves(piece: &Piece, board: &Board) -> BitBoard {
     
     let pred = |(x, y)| {
         if attacked.get(y * 8 + x) || combined_board.get(y * 8 + x) {
-            println!("({}, {})", x, y);
             return true;
         }
         false

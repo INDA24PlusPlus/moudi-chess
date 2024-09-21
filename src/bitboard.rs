@@ -1,7 +1,7 @@
 use std::ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Mul, Not};
 use std::fmt::Display;
 
-use crate::{Board, PieceType};
+use crate::{Board, PieceType, NUM_INDECES};
 
 #[derive(Copy, Clone)]
 pub struct BitBoard (u64);
@@ -9,6 +9,7 @@ pub struct BitBoard (u64);
 pub const EMPTY : BitBoard = BitBoard(0);
 
 impl BitBoard {
+    #[inline]
     pub fn set(&mut self, index: usize, value: bool) {
         if value {
             self.0 |= 1u64 << index;
@@ -52,6 +53,20 @@ impl BitBoard {
 
     pub fn clear(&mut self) {
         self.0 = 0;
+    }
+}
+
+impl Iterator for BitBoard {
+    type Item = usize;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let index = self.0.leading_zeros() as usize;
+        if index == 64 {
+            return None;
+        }
+
+        self.set(NUM_INDECES - index - 1, false);
+        Some(NUM_INDECES - index - 1)
     }
 }
 

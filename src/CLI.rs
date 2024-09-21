@@ -1,4 +1,4 @@
-use std::io::{self, Write};
+use std::{io::{self, Write}, time::{SystemTime, UNIX_EPOCH}};
 
 use crate::{Board, Chess, File, Side};
 
@@ -18,6 +18,8 @@ pub fn start() {
         if split.len() == 0 {
             continue;
         }
+
+        let start = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
 
         match split[0] {
             "fen" => chess.board = Board::from_fen(split[1..].join(" ")).unwrap(),
@@ -49,10 +51,14 @@ pub fn start() {
             "black" => chess.board.print_side(Side::Black),
             _ => {}
         }
+
+        let end = SystemTime::now().duration_since(UNIX_EPOCH).unwrap();
+
+        println!("Time taken: {}us", (end - start).as_micros());
     }
 }
 
-pub fn notation_to_index(move_notation: &str) -> usize {
+fn notation_to_index(move_notation: &str) -> usize {
     let lowercase = move_notation.to_lowercase();
     let mut chars = lowercase.chars();
     let file = (chars.next().unwrap() as u8) - b'a';

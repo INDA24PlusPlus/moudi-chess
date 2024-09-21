@@ -1,11 +1,11 @@
 use crate::{bitboard, BitBoard};
 use super::{Board, Piece, Side};
 
-pub fn is_allowed_move(piece: &Piece, board: &Board, index: usize) -> bool {
+pub(crate) fn is_allowed_move(piece: &Piece, board: &Board, index: usize) -> bool {
     get_all_moves(piece, board).get(index)
 }
 
-pub fn get_all_moves(piece: &Piece, board: &Board) -> BitBoard {
+pub(crate) fn get_all_moves(piece: &Piece, board: &Board) -> BitBoard {
     get_move_bitboard(piece, board) | get_attack_bitboard(piece, board)
 }
 
@@ -29,7 +29,7 @@ fn get_move_bitboard(piece: &Piece, board: &Board) -> BitBoard {
     bitboard
 }
 
-fn get_attack_bitboard(piece: &Piece, board: &Board) -> BitBoard {
+pub(crate) fn get_attack_bitboard(piece: &Piece, board: &Board) -> BitBoard {
     let opponent = board.get_opponent_board(piece);
     let (x, y) = piece.pos;
 

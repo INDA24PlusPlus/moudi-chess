@@ -5,19 +5,19 @@ mod board;
 pub use crate::board::*;
 
 mod pieces;
-pub use crate::pieces::*;
+pub use crate::pieces::{PieceType, Piece};
 
 mod bitboard;
-pub use crate::bitboard::*;
+use crate::bitboard::BitBoard;
 
 mod coordinateiterator;
 use crate::coordinateiterator::*;
 
 mod file;
-pub use crate::file::*;
+use crate::file::*;
 
 mod CLI;
-pub use crate::CLI::*;
+use crate::CLI::*;
 
 #[cfg(test)]
 mod tests {
@@ -25,13 +25,17 @@ mod tests {
 
     // #[test]
     // fn fen_parser_test() {
-    //     let board = Board::from_fen("8/4Pp2/1qp1k3/6P1/2R4b/1Ppnp3/2PK4/2B4B w - - 0 1".to_string()).unwrap(); 
-    //     println!("White:\n{}", board.white);
-    //     println!("Black:\n{}", board.black);
-    //     let piece = board.get_piece_at_pos(5 + 8 * 6).expect("No piece found");
-    //     println!("{}", piece);
-    //     let moves = piece.get_possible_moves(&board);
-    //     println!("Moves:\n{}", moves);
+    //     let mut chess = Chess::new();
+    //     chess.board = Board::from_fen("8/4Pp2/1qp1k3/6P1/2R4b/1Ppnp3/2PK4/2B4B w - - 0 1".to_string()).unwrap(); 
+    //     // for piece in chess.get_all_pieces() {
+    //     //     println!("{}", piece);
+    //     // }
+    //     let piece = &chess.get_all_pieces()[3];
+    //     println!("{}", piece.get_possible_moves(&chess.board));
+    //     println!("Piece: {}", piece);
+    //     for (x, y) in chess.get_moves(piece.get_occupied_slot()) {
+    //         println!("({}, {})", x, y);
+    //     }
     // }
 
     #[test]

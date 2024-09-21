@@ -8,11 +8,13 @@ use crate::file::*;
 mod piece;
 mod analysis;
 mod bitboards;
+mod state;
 
 const NUM_PIECES: usize = 6;
-const NUM_INDECES: usize = 64;
+pub(crate) const NUM_INDECES: usize = 64;
 
 #[derive(PartialEq, Eq, Copy, Clone, Debug)]
+/// The different player sides
 pub enum Side {
     White,
     Black
@@ -28,7 +30,7 @@ impl Side {
 }
 
 #[derive(PartialEq, Eq, Clone, Copy)]
-pub enum CastlingAbility {
+pub(crate) enum CastlingAbility {
     None,
     King,
     Queen,
@@ -113,6 +115,26 @@ impl Board {
         }
     }
 
+    pub fn semi_copy(&self) -> Board {
+        Board {
+            pieces: self.pieces.clone(),
+            white: self.white.clone(),
+            black: self.black.clone(),
+            side: self.side.clone(),
+            castling: self.castling.clone(),
+            ep_target: self.ep_target.clone(),
+            moves_to_50: self.moves_to_50.clone(),
+            move_counter: self.move_counter.clone(),
+
+            white_attacking_king: vec![],
+            black_attacking_king: vec![],
+            white_attacked: bitboard::EMPTY,
+            black_attacked: bitboard::EMPTY,
+            white_pinned: bitboard::EMPTY,
+            black_pinned: bitboard::EMPTY,
+        }
+    }
+
     pub fn from_fen(fen: String) -> Result<Board, String> {
         let mut board = Board::new();
         let parts : Vec<_> = fen.split_whitespace().collect();
@@ -158,7 +180,6 @@ impl Board {
         }
 
         if parts[3].len() != 1 {
-            println!("En passant");
             let chars : Vec<_> = parts[3].chars().collect();
             let file = File::from(chars[0]) as i8;
             let rank = (chars[1].to_digit(10).unwrap() as i8) - 1;

@@ -1,11 +1,11 @@
 use crate::{bitboard, BitBoard};
 use super::{Board, Piece};
 
-pub fn is_allowed_move(piece: &Piece, board: &Board, index: usize) -> bool {
+pub(crate) fn is_allowed_move(piece: &Piece, board: &Board, index: usize) -> bool {
     get_all_moves(piece, board).get(index)
 }
 
-pub fn get_all_moves(piece: &Piece, board: &Board) -> BitBoard {
+pub(crate) fn get_all_moves(piece: &Piece, board: &Board) -> BitBoard {
     let side = board.get_sides_board(piece.get_color());
     let (x, y) = piece.get_pos_as_usize();
     let mut list = vec![];

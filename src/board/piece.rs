@@ -1,9 +1,9 @@
 use crate::bitboard;
 
-use super::{BitBoard, Board, CastlingAbility, Piece, PieceType, Side, NUM_INDECES};
+use super::{BitBoard, Board, Piece, PieceType, Side, NUM_INDECES};
 
 impl Board {
-    pub fn move_piece(&mut self, piece: &Piece, index: usize) -> bool {
+    pub(crate) fn move_piece(&mut self, piece: &Piece, index: usize) -> bool {
         if !piece.is_allowed_move(self, index) {
             return false;
         }
@@ -59,7 +59,7 @@ impl Board {
         true
     }
 
-    pub fn get_piece_type_at_pos(&self, index: usize) -> PieceType {
+    pub(crate) fn get_piece_type_at_pos(&self, index: usize) -> PieceType {
         if !self.all_pieces_bitboard().get(index) {
             return PieceType::Empty;
         }
@@ -80,7 +80,7 @@ impl Board {
         }, (index % 8) as i8, (index / 8) as i8)
     }
 
-    pub fn get_piece_at_pos(&self, index: usize) -> Option<Piece> {
+    pub(crate) fn get_piece_at_pos(&self, index: usize) -> Option<Piece> {
         let piecetype = self.get_piece_type_at_pos(index);
         
         if piecetype == PieceType::Empty {
@@ -90,17 +90,11 @@ impl Board {
         Some(self.index_to_piece(index, piecetype))
     }
 
-    pub fn get_all_pieces(&self) -> Vec<Piece> {
+    pub(crate) fn get_all_pieces(&self) -> Vec<Piece> {
         (0..NUM_INDECES).filter_map(|n| self.get_piece_at_pos(n)).collect::<Vec<_>>()
     }
     
-    fn encode_en_passant(&mut self, piece: &Piece, new_index: i8) {
-        if ((piece.get_occupied_slot() as i8) - new_index).abs() == 16 {
-            self.ep_target = Some(new_index);
-        }
-    }
-
-    pub fn get_king(&self, side: Side) -> usize {
+    pub(crate) fn get_king(&self, side: Side) -> usize {
         let king_board = self.get_sides_board(side) & self.pieces[PieceType::King.to_value()];
 
         assert!(king_board.to_number() != 0);
@@ -108,7 +102,7 @@ impl Board {
         return (NUM_INDECES) - (king_board.to_number().leading_zeros() + 1) as usize;
     }
 
-    pub fn check_and_set_piece_iter<F>(&self, piece: &Piece, moves: impl Iterator<Item = (usize, usize)>, action: F) -> BitBoard 
+    pub(crate) fn check_and_set_piece_iter<F>(&self, piece: &Piece, moves: impl Iterator<Item = (usize, usize)>, action: F) -> BitBoard 
         where F: Fn(&mut BitBoard, usize, usize) -> bool
     {
         let mut board = bitboard::EMPTY;
@@ -119,41 +113,5 @@ impl Board {
         }
 
         board
-    }
-
-    pub fn update_calculations(&mut self) {
-        // recalculate attacked pieces for checkmate test
-        self.calculate_attacked(self.side);
-        // switch side so that it's the next players turn
-        self.side = self.side.get_opposite();
-        self.calculate_attacked(self.side);
-        self.calculate_pinned_pieces(self.side);
-    }
-
-    fn update_castling_ability(&mut self, piece: &Piece) {
-        let color = match piece.get_color() {
-            Side::White => 0,
-            Side::Black => 1,
-        };
-
-        match piece.get_piece_type() {
-            PieceType::King => {
-                self.castling[color] = CastlingAbility::None;
-            },
-            PieceType::Rook => {
-                if self.castling[color] != CastlingAbility::None {
-                    return;
-                }
-
-                match piece.get_pos_as_usize().0 {
-                    0 => self.castling[color].remove(CastlingAbility::King),
-                    7 => self.castling[color].remove(CastlingAbility::Queen),
-                    _ => {}
-                }
-            },
-            _ => {}
-        }
-        
-
     }
 }

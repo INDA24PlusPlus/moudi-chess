@@ -1,7 +1,7 @@
 use core::fmt::Display;
 use crate::{bitboard, board::*, BitBoard};
 
-mod pawn;
+pub(crate) mod pawn;
 pub use pawn::*;
 mod knight;
 pub use knight::*;
@@ -16,6 +16,9 @@ pub use king::*;
 
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]
+/// The types of pieces
+///
+/// This is represents what is on a slot of the board and can therefore be Empty as well
 pub enum PieceType {
     Empty,
     Pawn,
