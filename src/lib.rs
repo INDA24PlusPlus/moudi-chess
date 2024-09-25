@@ -43,8 +43,8 @@ mod tests {
     #[test]
     fn promotion() {
         let mut chess = Chess::from_fen("8/6P1/2p1k3/8/8/1q6/8/4K3 w - - 0 1".to_string());
-        let g7 = 6 * 8 + 6;
-        let g8 = 7 * 8 + 6;
+        let g7 = notation_to_index("G7");
+        let g8 = notation_to_index("G8");
 
         assert!(chess.board.get_playing_side() == Side::White);
         assert!(chess.make_move(g7, g8));
@@ -65,23 +65,48 @@ mod tests {
     #[test]
     fn move_piece_to_block_check() {
         let mut chess = Chess::from_fen("8/1k6/1bp5/8/8/1q6/3P4/6K1 w - - 0 1".to_string());
-        let d2 = 8 * 1 + 3;
-        let d4 = 8 * 3 + 3;
 
-        assert!(chess.make_move(d2, d4));
+        assert!(chess.make_move(notation_to_index("D2"), notation_to_index("D4")));
     }
 
     #[test]
     fn move_piece_to_not_block_check() {
         let mut chess = Chess::from_fen("8/1k6/1bp5/8/8/1q6/3P4/6K1 w - - 0 1".to_string());
-        let d2 = 8 * 1 + 3;
-        let d3 = 8 * 2 + 3;
 
-        assert!(!chess.make_move(d2, d3));
+        assert!(!chess.make_move(notation_to_index("D2"), notation_to_index("D3")));
+    }
+
+    #[test]
+    fn en_passant() {
+        let mut chess = Chess::new();
+
+        assert!(chess.get_playing_side() == Side::White);
+        assert!(chess.make_move(notation_to_index("E2"), notation_to_index("E4")));
+
+        assert!(chess.get_playing_side() == Side::Black);
+        assert!(chess.make_move(notation_to_index("D7"), notation_to_index("D5")));
+
+        assert!(chess.get_playing_side() == Side::White);
+        assert!(chess.make_move(notation_to_index("E4"), notation_to_index("D5")));
+
+        assert!(chess.get_playing_side() == Side::Black);
+        assert!(chess.make_move(notation_to_index("C7"), notation_to_index("C5")));
+
+        assert!(chess.get_playing_side() == Side::White);
+        assert!(chess.make_move(notation_to_index("D5"), notation_to_index("C5")));
+
+        assert!(chess.get_playing_side() == Side::Black);
     }
 
     // #[test]
     // fn cli() {
     //     cli::start();
     // }
+}
+
+fn notation_to_index(move_notation: &'static str) -> usize {
+    let mut chars = move_notation.chars();
+    let file = (chars.next().unwrap() as u8) - b'A';
+    let rank = (chars.next().unwrap() as u8) - b'1';
+    (rank * 8 + file) as usize
 }

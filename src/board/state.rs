@@ -34,7 +34,9 @@ impl Board {
     }
 
     pub(crate) fn encode_en_passant(&mut self, piece: &Piece, new_index: i8) {
-        if ((piece.get_occupied_slot() as i8) - new_index).abs() == 16 {
+        println!("called");
+        if piece.get_occupied_slot().abs_diff(new_index as usize) == 16 {
+            println!("encoded");
             self.ep_target = Some(new_index);
         }
     }
