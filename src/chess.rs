@@ -1,4 +1,4 @@
-use crate::{Board, Piece, PieceType};
+use crate::{Board, Piece, PieceType, Side};
 
 /// Initialize this object
 ///
@@ -200,6 +200,10 @@ impl Chess {
         self.state
     }
 
+    /// Get the current playing side
+    pub fn get_playing_side(&self) -> Side {
+        self.board.get_playing_side()
+    }
 
     
 }
