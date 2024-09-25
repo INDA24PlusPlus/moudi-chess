@@ -17,12 +17,12 @@ pub(crate) fn get_all_moves(piece: &Piece, board: &Board) -> BitBoard {
         false
     };
 
-    board.check_and_set_piece_iter(piece, CoordinateIterator::new(pos, (pos.0, 7)), action) // NORTH
-        | board.check_and_set_piece_iter(piece, CoordinateIterator::new(pos, (7, pos.1)), action) // EAST
-        | board.check_and_set_piece_iter(piece, CoordinateIterator::new(pos, (pos.0, 0)), action) // SOUTH
-        | board.check_and_set_piece_iter(piece, CoordinateIterator::new(pos, (0, pos.1)), action) // WEST
-        | board.check_and_set_piece_iter(piece, CoordinateIterator::new(pos, (0, 7)), action) // NORTH-WEST
-        | board.check_and_set_piece_iter(piece, CoordinateIterator::new(pos, (7, 7)), action) // NORTH-EAST
-        | board.check_and_set_piece_iter(piece, CoordinateIterator::new(pos, (7, 0)), action) // SOUTH-EAST
-        | board.check_and_set_piece_iter(piece, CoordinateIterator::new(pos, (0, 0)), action) // SOUTH-WEST
+    board.check_and_set_piece_iter(piece, CoordinateIterator::from_delta(pos, (0, 1)), action) // NORTH
+        | board.check_and_set_piece_iter(piece, CoordinateIterator::from_delta(pos, (1, 1)), action) // NORTH-EAST
+        | board.check_and_set_piece_iter(piece, CoordinateIterator::from_delta(pos, (1, 0)), action) // EAST
+        | board.check_and_set_piece_iter(piece, CoordinateIterator::from_delta(pos, (1, -1)), action) // SOUTH-EAST
+        | board.check_and_set_piece_iter(piece, CoordinateIterator::from_delta(pos, (0, -1)), action) // SOUTH
+        | board.check_and_set_piece_iter(piece, CoordinateIterator::from_delta(pos, (-1, -1)), action) // SOUTH-WEST
+        | board.check_and_set_piece_iter(piece, CoordinateIterator::from_delta(pos, (-1, 0)), action) // WEST
+        | board.check_and_set_piece_iter(piece, CoordinateIterator::from_delta(pos, (-1, 1)), action) // NORTH-WEST
 }

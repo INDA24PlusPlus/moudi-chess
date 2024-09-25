@@ -8,12 +8,21 @@ pub struct CoordinateIterator {
 }
 
 impl CoordinateIterator {
-    pub fn new(start: (usize, usize), end: (usize, usize)) -> Self { 
+    pub fn from_to(start: (usize, usize), end: (usize, usize)) -> Self { 
         CoordinateIterator {
             current: start,
             end,
             dx: (end.0 as isize - start.0 as isize).signum(),
             dy: (end.1 as isize - start.1 as isize).signum(),
+        }
+    }
+
+    pub fn from_delta(start: (usize, usize), delta: (isize, isize)) -> Self {
+        CoordinateIterator {
+            current: start,
+            end: (if delta.0 < 0 {0} else {8}, if delta.1 < 0 {0} else {8}),
+            dx: delta.0,
+            dy: delta.1,
         }
     }
 

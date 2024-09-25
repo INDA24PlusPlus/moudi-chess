@@ -70,6 +70,7 @@ impl CastlingAbility {
     }
 }
 
+/// All information about a chess board
 pub struct Board {
     pieces: [ BitBoard; NUM_PIECES ], // piece placement
     white: BitBoard,    // placement of all white pieces
@@ -89,13 +90,14 @@ pub struct Board {
 }
 
 impl Default for Board {
+    /// Get the default chess board layout for your chess board
     fn default() -> Board {
         Board::from_fen("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1".to_string()).unwrap()
     }
 }
 
 impl Board {
-    pub fn new() -> Board {
+    pub(crate) fn new() -> Board {
         Board {
             pieces: [bitboard::EMPTY; NUM_PIECES],
             white: bitboard::EMPTY,
@@ -115,7 +117,7 @@ impl Board {
         }
     }
 
-    pub fn from_fen(fen: String) -> Result<Board, String> {
+    pub(crate) fn from_fen(fen: String) -> Result<Board, String> {
         let mut board = Board::new();
         let parts : Vec<_> = fen.split_whitespace().collect();
  
@@ -175,34 +177,43 @@ impl Board {
     }
 
     #[inline]
-    pub fn is_inbounds(x: usize, y: usize) -> bool {
+    pub(crate) fn is_inbounds(x: usize, y: usize) -> bool {
         (0..8).contains(&x) && (0..8).contains(&y)
     }
 
-    pub fn is_empty(&self, index: usize) -> bool {
+    #[inline]
+    pub(crate) fn is_empty(&self, index: usize) -> bool {
         self.get_piece_type_at_pos(index) == PieceType::Empty
     }
 
-    pub fn get_ep_target(&self) -> Option<i8> {
+    #[inline]
+    pub(crate) fn get_ep_target(&self) -> Option<i8> {
         self.ep_target
     }
 
-    pub fn get_playing_side(&self) -> Side {
+    #[inline]
+    pub(crate) fn get_playing_side(&self) -> Side {
         self.side
     }
 
-    pub fn get_castling(&self, side: Side) -> CastlingAbility {
+    pub(crate) fn get_castling(&self, side: Side) -> CastlingAbility {
         match side {
             Side::White => self.castling[0],
             Side::Black => self.castling[1],
         }
     }
 
-    pub fn get_combined_piece_board(&self) -> BitBoard {
+    #[inline]
+    pub(crate) fn get_combined_piece_board(&self) -> BitBoard {
         self.white | self.black
     }
 
-    pub fn get_side_computed_boards(&self, side: Side) -> (BitBoard, &Vec<Piece>, BitBoard) {
+    #[inline]
+    pub(crate) fn get_moves_to_50(&self) -> i8 {
+        self.moves_to_50
+    }
+
+    pub(crate) fn get_side_computed_boards(&self, side: Side) -> (BitBoard, &Vec<Piece>, BitBoard) {
         match side {
             Side::White => (self.white_pinned, &self.white_attacking_king, self.white_attacked),
             Side::Black => (self.black_pinned, &self.black_attacking_king, self.black_attacked)

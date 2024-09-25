@@ -52,12 +52,12 @@ pub(crate) fn get_all_moves(piece: &Piece, board: &Board) -> BitBoard {
 
     let mut castling_bitboard = bitboard::EMPTY;
     // has king side castlingability that those slots are open and not attacked
-    if castling.has(CastlingAbility::King) && !CoordinateIterator::new(piece.get_pos_as_usize(), (6, y)).any(pred) {
+    if castling.has(CastlingAbility::King) && !CoordinateIterator::from_to(piece.get_pos_as_usize(), (6, y)).any(pred) {
         castling_bitboard.set(y * 8 + 6, true);
     }
 
     // has queen side castlingability that those slots are open and not attacked
-    if castling.has(CastlingAbility::Queen) && !CoordinateIterator::new(piece.get_pos_as_usize(), (2, y)).any(pred) {
+    if castling.has(CastlingAbility::Queen) && !CoordinateIterator::from_to(piece.get_pos_as_usize(), (2, y)).any(pred) {
         castling_bitboard.set(y * 8 + 2, true);
     }
 

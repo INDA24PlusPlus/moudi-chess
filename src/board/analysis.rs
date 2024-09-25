@@ -33,21 +33,21 @@ impl Board {
         let diagonal_pieces = (self.pieces[PieceType::Bishop.to_value()] | self.pieces[PieceType::Queen.to_value()] ) & opponent;
  
         // NORTH
-        self.add_pinned(&mut pinned, CoordinateIterator::new(king_pos, (king_pos.0, 7)), straight_pieces, sides_board);
+        self.add_pinned(&mut pinned, CoordinateIterator::from_to(king_pos, (king_pos.0, 7)), straight_pieces, sides_board);
         // NORTH-EAST
-        self.add_pinned(&mut pinned, CoordinateIterator::new(king_pos, (7, 7)), diagonal_pieces, sides_board);
+        self.add_pinned(&mut pinned, CoordinateIterator::from_to(king_pos, (7, 7)), diagonal_pieces, sides_board);
         // EAST
-        self.add_pinned(&mut pinned, CoordinateIterator::new(king_pos, (7, king_pos.1)), straight_pieces, sides_board);
+        self.add_pinned(&mut pinned, CoordinateIterator::from_to(king_pos, (7, king_pos.1)), straight_pieces, sides_board);
         // SOUTH-EAST
-        self.add_pinned(&mut pinned, CoordinateIterator::new(king_pos, (7, 0)), diagonal_pieces, sides_board);
+        self.add_pinned(&mut pinned, CoordinateIterator::from_to(king_pos, (7, 0)), diagonal_pieces, sides_board);
         // SOUTH
-        self.add_pinned(&mut pinned, CoordinateIterator::new(king_pos, (king_pos.0, 0)), straight_pieces, sides_board);
+        self.add_pinned(&mut pinned, CoordinateIterator::from_to(king_pos, (king_pos.0, 0)), straight_pieces, sides_board);
         // SOUTH-WEST
-        self.add_pinned(&mut pinned, CoordinateIterator::new(king_pos, (0, 0)), diagonal_pieces, sides_board);
+        self.add_pinned(&mut pinned, CoordinateIterator::from_to(king_pos, (0, 0)), diagonal_pieces, sides_board);
         // WEST
-        self.add_pinned(&mut pinned, CoordinateIterator::new(king_pos, (0, king_pos.1)), straight_pieces, sides_board);
+        self.add_pinned(&mut pinned, CoordinateIterator::from_to(king_pos, (0, king_pos.1)), straight_pieces, sides_board);
         // NORTH-WEST
-        self.add_pinned(&mut pinned, CoordinateIterator::new(king_pos, (0, 7)), diagonal_pieces, sides_board);
+        self.add_pinned(&mut pinned, CoordinateIterator::from_to(king_pos, (0, 7)), diagonal_pieces, sides_board);
         
         match side {
             Side::White => self.white_pinned = pinned,
@@ -131,7 +131,7 @@ impl Board {
         }
 
         let king_index = self.get_king(piece.get_color());
-        CoordinateIterator::new(attacking_piece.get_pos_as_usize(), (king_index % 8, king_index / 8)).contains((x, y))
+        CoordinateIterator::from_to(attacking_piece.get_pos_as_usize(), (king_index % 8, king_index / 8)).contains((x, y))
     }
 
     fn is_guarded_piece(&self, piece: &Piece) -> bool {
@@ -190,8 +190,8 @@ impl Board {
 
     pub(crate) fn still_pinned_piece_at_pos(&self, piece: &Piece, x: usize, y: usize) -> bool {
         let king_index = self.get_king(piece.get_color());
-        let piece_movement = CoordinateIterator::new(piece.get_pos_as_usize(), (x, y)).get_change();
-        let king_to_piece = CoordinateIterator::new((king_index % 8, king_index / 8), piece.get_pos_as_usize()).get_change();
+        let piece_movement = CoordinateIterator::from_to(piece.get_pos_as_usize(), (x, y)).get_change();
+        let king_to_piece = CoordinateIterator::from_to((king_index % 8, king_index / 8), piece.get_pos_as_usize()).get_change();
 
         piece_movement == king_to_piece || (piece_movement.0 == -king_to_piece.0 && piece_movement.1 == -king_to_piece.1)
     }

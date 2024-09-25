@@ -17,8 +17,8 @@ pub(crate) fn get_all_moves(piece: &Piece, board: &Board) -> BitBoard {
         false
     };
 
-    board.check_and_set_piece_iter(piece, CoordinateIterator::new(pos, (0, 7)), action) // NORTH-WEST
-        | board.check_and_set_piece_iter(piece, CoordinateIterator::new(pos, (7, 7)), action) // NORTH-EAST
-        | board.check_and_set_piece_iter(piece, CoordinateIterator::new(pos, (7, 0)), action) // SOUTH-EAST
-        | board.check_and_set_piece_iter(piece, CoordinateIterator::new(pos, (0, 0)), action) // SOUTH-WEST
+    board.check_and_set_piece_iter(piece, CoordinateIterator::from_delta(pos, (-1, 1)), action) // NORTH-WEST
+        | board.check_and_set_piece_iter(piece, CoordinateIterator::from_delta(pos, (1, 1)), action) // NORTH-EAST
+        | board.check_and_set_piece_iter(piece, CoordinateIterator::from_delta(pos, (1, -1)), action) // SOUTH-EAST
+        | board.check_and_set_piece_iter(piece, CoordinateIterator::from_delta(pos, (-1, -1)), action) // SOUTH-WEST
 }

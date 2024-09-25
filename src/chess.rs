@@ -127,7 +127,9 @@ impl Chess {
     }
 
     fn update_state(&mut self) {
-        if self.promoting_index != None {
+        if self.board.get_moves_to_50() >= 50 {
+            self.state = State::Draw;
+        } else if self.promoting_index != None {
             self.state = State::Promotion;
         } else if self.board.get_side_computed_boards(self.board.get_playing_side()).1.len() != 0 { 
             if self.board.is_no_possible_moves(self.board.get_playing_side()) {

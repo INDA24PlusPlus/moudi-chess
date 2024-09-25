@@ -16,7 +16,7 @@ fn get_move_bitboard(piece: &Piece, board: &Board) -> BitBoard {
         Side::Black => (x, if y == 6 {4} else {y - 1}),
     };
 
-    board.check_and_set_piece_iter(piece, CoordinateIterator::new(piece.get_pos_as_usize(), end), 
+    board.check_and_set_piece_iter(piece, CoordinateIterator::from_to(piece.get_pos_as_usize(), end), 
         |bitboard: &mut BitBoard, x, y| {
             !bitboard.is_empty_on_board_and_set(board, x, y)
         })

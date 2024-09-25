@@ -47,6 +47,7 @@ impl PieceType {
     }
 }
 
+/// All information about a piece on the board
 pub struct Piece {
     piece: PieceType,
     color: Side,
@@ -54,7 +55,7 @@ pub struct Piece {
 }
 
 impl Piece {
-    pub fn new(piece: PieceType, color: Side, x: i8, y: i8) -> Self {
+    pub(crate) fn new(piece: PieceType, color: Side, x: i8, y: i8) -> Self {
         Piece {
             piece,
             color,
@@ -62,7 +63,7 @@ impl Piece {
         }
     }
 
-    pub fn is_allowed_move(&self, board: &Board, index: usize) -> bool {
+    pub(crate) fn is_allowed_move(&self, board: &Board, index: usize) -> bool {
         match self.piece {
             PieceType::Pawn => pawn::is_allowed_move(self, board, index),
             PieceType::Knight => knight::is_allowed_move(self, board, index),
@@ -74,7 +75,7 @@ impl Piece {
         }
     }
 
-    pub fn get_possible_moves(&self, board: &Board) -> BitBoard {
+    pub(crate) fn get_possible_moves(&self, board: &Board) -> BitBoard {
         let moves = match self.piece {
             PieceType::Pawn => pawn::get_all_moves(self, board),
             PieceType::Knight => knight::get_all_moves(self, board),
@@ -88,18 +89,22 @@ impl Piece {
         moves
     }
 
+    /// Get the PieceType of a piece
     pub fn get_piece_type(&self) -> PieceType {
         self.piece
     }
 
+    /// Get the slot/index/square that this piece is on
     pub fn get_occupied_slot(&self) -> usize {
         (self.pos.1 * 8 + self.pos.0) as usize
     }
 
+    /// Get the coordinate of this piece
     pub fn get_pos_as_usize(&self) -> (usize, usize) {
         (self.pos.0 as usize, self.pos.1 as usize)
     }
 
+    /// Get the color of this piece
     pub fn get_color(&self) -> Side {
         self.color
     }
