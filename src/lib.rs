@@ -98,10 +98,58 @@ mod tests {
         assert!(chess.get_playing_side() == Side::Black);
     }
 
-    // #[test]
-    // fn cli() {
-    //     cli::start();
-    // }
+    #[test]
+    fn take_attacking_piece_not_with_king_while_in_check() {
+        let mut chess = Chess::new();
+
+        assert!(chess.get_playing_side() == Side::White);
+        assert!(chess.make_move(notation_to_index("B1"), notation_to_index("C3")));
+
+        assert!(chess.get_playing_side() == Side::Black);
+        assert!(chess.make_move(notation_to_index("D7"), notation_to_index("D6")));
+
+        assert!(chess.get_playing_side() == Side::White);
+        assert!(chess.make_move(notation_to_index("C3"), notation_to_index("B5")));
+
+        assert!(chess.get_playing_side() == Side::Black);
+        assert!(chess.make_move(notation_to_index("D6"), notation_to_index("D5")));
+
+        assert!(chess.get_playing_side() == Side::White);
+        assert!(chess.make_move(notation_to_index("B5"), notation_to_index("C7")));
+
+        assert!(chess.get_state() == State::Check);
+        assert!(chess.get_playing_side() == Side::Black);
+        assert!(chess.make_move(notation_to_index("D8"), notation_to_index("C7")));
+    }
+
+    #[test]
+    fn take_attacking_piece_with_king_while_in_check() {
+        let mut chess = Chess::new();
+
+        assert!(chess.get_playing_side() == Side::White);
+        assert!(chess.make_move(notation_to_index("E2"), notation_to_index("E4")));
+
+        assert!(chess.get_playing_side() == Side::Black);
+        assert!(chess.make_move(notation_to_index("E7"), notation_to_index("E6")));
+
+        assert!(chess.get_playing_side() == Side::White);
+        assert!(chess.make_move(notation_to_index("D1"), notation_to_index("H5")));
+
+        assert!(chess.get_playing_side() == Side::Black);
+        assert!(chess.make_move(notation_to_index("E6"), notation_to_index("E5")));
+
+        assert!(chess.get_playing_side() == Side::White);
+        assert!(chess.make_move(notation_to_index("H5"), notation_to_index("F7")));
+
+        assert!(chess.get_state() == State::Check);
+        assert!(chess.get_playing_side() == Side::Black);
+        assert!(chess.make_move(notation_to_index("E8"), notation_to_index("F7")));
+    }
+
+    #[test]
+    fn cli() {
+        cli::start();
+    }
 }
 
 fn notation_to_index(move_notation: &'static str) -> usize {

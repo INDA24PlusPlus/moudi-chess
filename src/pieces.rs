@@ -76,7 +76,7 @@ impl Piece {
     }
 
     pub(crate) fn get_possible_moves(&self, board: &Board) -> BitBoard {
-        let moves = match self.piece {
+        match self.piece {
             PieceType::Pawn => pawn::get_all_moves(self, board),
             PieceType::Knight => knight::get_all_moves(self, board),
             PieceType::Bishop => bishop::get_all_moves(self, board),
@@ -84,9 +84,7 @@ impl Piece {
             PieceType::Queen => queen::get_all_moves(self, board),
             PieceType::King => king::get_all_moves(self, board),
             _ => bitboard::EMPTY,
-        };
-        
-        moves
+        }    
     }
 
     /// Get the PieceType of a piece

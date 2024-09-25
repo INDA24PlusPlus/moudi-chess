@@ -123,9 +123,10 @@ impl Board {
 
     fn will_block_or_capture_king_attack(&self, piece: &Piece, attacking_piece: &Piece, x: usize, y: usize) -> bool {
         match attacking_piece.get_piece_type() {
-            PieceType::Pawn | PieceType::Knight => return false,
+            PieceType::Pawn | PieceType::Knight => return y * 8 + x == attacking_piece.get_occupied_slot(),
             _ => {}
         }
+        
         if y * 8 + x == attacking_piece.get_occupied_slot() {
             return true;
         }

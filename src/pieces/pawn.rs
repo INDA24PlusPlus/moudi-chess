@@ -38,9 +38,6 @@ pub(crate) fn get_attack_bitboard(piece: &Piece, board: &Board) -> BitBoard {
 
     if let Some(ep_index) = board.get_ep_target() {
         // check for en passant and normal attack
-        println!("({}, {}) == ({}, {})", attack_level, x - 1, ep_index % 8, ep_index / 8);
-        println!("({}, {}) == ({}, {})", attack_level, x + 1, ep_index % 8, ep_index / 8);
-
         board.check_and_set_piece_iter(piece, 
             vec![((x - 1) as usize, y as usize), ((x + 1) as usize, y as usize)].iter().map(|(x, y)| (*x, *y)),  |bitboard, x, y| {
                let _ = bitboard.predicate_and_set(x, y, |x, y| (y * 8 + x == ep_index as usize)) || bitboard.compare_and_set(opponent, true, x, attack_level);
