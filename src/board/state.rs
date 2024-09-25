@@ -4,6 +4,7 @@ impl Board {
     pub(crate) fn update_calculations(&mut self) {
         // recalculate attacked pieces for checkmate test
         self.calculate_attacking_and_attacked(self.side);
+        // calculate new sides stuff
         self.calculate_attacking_and_attacked(self.side.get_opposite());
         self.calculate_pinned_pieces(self.side.get_opposite());
     }

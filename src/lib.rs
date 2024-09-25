@@ -93,7 +93,7 @@ mod tests {
         assert!(chess.make_move(notation_to_index("C7"), notation_to_index("C5")));
 
         assert!(chess.get_playing_side() == Side::White);
-        assert!(chess.make_move(notation_to_index("D5"), notation_to_index("C5")));
+        assert!(chess.make_move(notation_to_index("D5"), notation_to_index("C6")));
 
         assert!(chess.get_playing_side() == Side::Black);
     }
@@ -144,6 +144,27 @@ mod tests {
         assert!(chess.get_state() == State::Check);
         assert!(chess.get_playing_side() == Side::Black);
         assert!(chess.make_move(notation_to_index("E8"), notation_to_index("F7")));
+    }
+
+    #[test]
+    fn king_not_able_to_attack_king() {
+        let mut chess = Chess::from_fen("8/8/5k2/8/3K4/8/8/8 w - - 0 1".to_string());
+
+        assert!(chess.get_playing_side() == Side::White);
+        assert!(!chess.make_move(notation_to_index("D4"), notation_to_index("E5")));
+
+        assert!(chess.get_playing_side() == Side::White);
+        assert!(chess.make_move(notation_to_index("D4"), notation_to_index("D5")));
+
+        assert!(chess.get_playing_side() == Side::Black);
+        assert!(!chess.make_move(notation_to_index("F6"), notation_to_index("E5")));
+    }
+
+    #[test]
+    fn special_checkmate() {
+        let chess = Chess::from_fen("8/8/3Q4/4k3/5Q2/8/8/4K3 w - - 0 1".to_string());
+
+        assert!(chess.get_state() == State::Checkmate);
     }
 
     #[test]
