@@ -55,6 +55,8 @@ impl Board {
         }
         
         self.update_calculations();
+        // switch side so that it's the next players turn
+        self.side = self.side.get_opposite();
 
         true
     }

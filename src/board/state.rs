@@ -4,10 +4,8 @@ impl Board {
     pub(crate) fn update_calculations(&mut self) {
         // recalculate attacked pieces for checkmate test
         self.calculate_attacking_and_attacked(self.side);
-        // switch side so that it's the next players turn
-        self.side = self.side.get_opposite();
-        self.calculate_attacking_and_attacked(self.side);
-        self.calculate_pinned_pieces(self.side);
+        self.calculate_attacking_and_attacked(self.side.get_opposite());
+        self.calculate_pinned_pieces(self.side.get_opposite());
     }
 
     pub(crate) fn update_castling_ability(&mut self, piece: &Piece) {
