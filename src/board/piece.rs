@@ -10,7 +10,7 @@ impl Board {
 
         // if there is an active en passant target
         if let Some(ep_index) = self.ep_target {
-            if index == (ep_index as usize) {
+            if piece.get_piece_type() == PieceType::Pawn && index.abs_diff(ep_index as usize) == 8 {
                 self.take_en_passant(&piece, ep_index);
             }
             self.ep_target = None;
