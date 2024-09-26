@@ -29,7 +29,7 @@ impl Side {
     }
 }
 
-#[derive(PartialEq, Eq, Clone, Copy)]
+#[derive(PartialEq, Eq, Clone, Copy, Debug)]
 pub(crate) enum CastlingAbility {
     None,
     King,

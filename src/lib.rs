@@ -288,9 +288,31 @@ mod tests {
     }
 
     #[test]
-    fn cli() {
-        cli::start();
+    fn castle_queen_side() {
+        let mut chess = Chess::from_fen("r3k2r/pppppppp/8/8/8/8/PPPPPPPP/R3K2R w KQkq - 0 1".to_string());
+
+        assert!(chess.get_playing_side() == Side::White);
+        assert!(chess.make_move(notation_to_index("E1"), notation_to_index("C1")));
+
+        assert!(chess.get_playing_side() == Side::Black);
+        assert!(chess.make_move(notation_to_index("E8"), notation_to_index("C8")));
     }
+
+    #[test]
+    fn castle_king_side() {
+        let mut chess = Chess::from_fen("r3k2r/pppppppp/8/8/8/8/PPPPPPPP/R3K2R w KQkq - 0 1".to_string());
+
+        assert!(chess.get_playing_side() == Side::White);
+        assert!(chess.make_move(notation_to_index("E1"), notation_to_index("G1")));
+
+        assert!(chess.get_playing_side() == Side::Black);
+        assert!(chess.make_move(notation_to_index("E8"), notation_to_index("G8")));
+    }
+
+    // #[test]
+    // fn cli() {
+    //     cli::start();
+    // }
 }
 
 fn notation_to_index(move_notation: &'static str) -> usize {

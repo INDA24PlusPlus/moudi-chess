@@ -11,21 +11,30 @@ pub(crate) fn get_allowed_moves(piece: &Piece, board: &Board) -> BitBoard {
     let combined_board = board.get_combined_piece_board();
     let (x, y) = piece.get_pos_as_usize();
     
-    let is_not_empty_or_attacked = |(x, y)| attacked.get(y * 8 + x) || combined_board.get(y * 8 + x);
-
-    let mut castling_bitboard = bitboard::EMPTY;
-    // has king side castlingability that those slots are open and not attacked
-    if castling.has(CastlingAbility::King) && !CoordinateIterator::from_inclusive_to(piece.get_pos_as_usize(), (6, y)).any(is_not_empty_or_attacked) {
-        castling_bitboard.set(y * 8 + 6, true);
-    }
-
-    // has queen side castlingability that those slots are open and not attacked
-    if castling.has(CastlingAbility::Queen) && !CoordinateIterator::from_inclusive_to(piece.get_pos_as_usize(), (2, y)).any(is_not_empty_or_attacked) {
-        castling_bitboard.set(y * 8 + 2, true);
-    }
+    // x != 4 since that is the king square and there is obviously a piece there
+    let is_not_empty_or_attacked = |(x, y)| attacked.get(y * 8 + x) || (x != 4 && combined_board.get(y * 8 + x));
 
     let side = board.get_sides_board(piece.get_color());
-    board.filter_king_safety(castling_bitboard | get_attacked_squares(piece, board).filter_on(|index| !side.get(index)), piece)
+    let mut bitboard = get_attacked_squares(piece, board).filter_on(|index| !side.get(index));
+
+    println!("{:?}", castling);
+    println!("King: {}", castling.has(CastlingAbility::King));
+    // has king side castlingability that those slots are open and not attacked
+    if castling.has(CastlingAbility::King) && !CoordinateIterator::from_inclusive_to(piece.get_pos_as_usize(), (6, y)).any(is_not_empty_or_attacked) {
+        println!("king castle");
+        bitboard.set(y * 8 + 6, true);
+    }
+
+    println!("Queen: {}", castling.has(CastlingAbility::Queen));
+    // has queen side castlingability that those slots are open and not attacked
+    if castling.has(CastlingAbility::Queen) && !CoordinateIterator::from_inclusive_to(piece.get_pos_as_usize(), (2, y)).any(is_not_empty_or_attacked) {
+        println!("queen castle");
+        bitboard.set(y * 8 + 2, true);
+    }
+
+    println!("{}", bitboard);
+
+    board.filter_king_safety(bitboard, piece)
 }
 
 pub(crate) fn get_attacked_squares(piece: &Piece, board: &Board) -> BitBoard {
