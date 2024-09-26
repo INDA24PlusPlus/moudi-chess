@@ -18,10 +18,6 @@ impl BitBoard {
         }
     }
 
-    pub fn set_coord(&mut self, x: usize, y: usize, value: bool) {
-        self.set(y * 8 + x, value);
-    }
-
     pub fn predicate_and_set<F>(&mut self, x: usize, y: usize, predicate: F) -> bool
         where F: Fn(usize, usize) -> bool
     {
@@ -49,10 +45,6 @@ impl BitBoard {
 
     pub fn to_number(&self) -> u64 {
         self.0
-    }
-
-    pub fn clear(&mut self) {
-        self.0 = 0;
     }
 
     pub fn filter_on<F>(&mut self, predicate: F) -> Self 

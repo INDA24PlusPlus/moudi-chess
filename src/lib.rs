@@ -165,12 +165,12 @@ mod tests {
         assert!(!chess.make_move(notation_to_index("F6"), notation_to_index("E5")));
     }
 
-    // #[test]
-    // fn special_checkmate() {
-    //     let chess = Chess::from_fen("8/8/3Q4/4k3/5Q2/8/8/4K3 b - - 0 1".to_string());
-    //
-    //     assert!(chess.get_state() == State::Checkmate);
-    // }
+    #[test]
+    fn special_checkmate() {
+        let chess = Chess::from_fen("8/8/3Q4/4k3/5Q2/8/8/4K3 b - - 0 1".to_string());
+    
+        assert!(chess.get_state() == State::Checkmate);
+    }
 
     #[test]
     fn castle_while_in_check() {
@@ -233,10 +233,64 @@ mod tests {
         assert!(chess.make_move(notation_to_index("F1"), notation_to_index("E2")));
     }
 
-    // #[test]
-    // fn cli() {
-    //     cli::start();
-    // }
+    #[test]
+    fn take_piece_protected_by_pawn_with_king() {
+        let mut chess = Chess::from_fen("8/3p4/4q3/4K3/8/8/8/8 w - - 0 1".to_string());
+
+        assert!(chess.get_state() == State::Check);
+        assert!(chess.get_playing_side() == Side::White);
+        assert!(!chess.make_move(notation_to_index("E5"), notation_to_index("E6")));
+    }
+
+    #[test]
+    fn take_piece_protected_by_bishop_with_king() {
+        let mut chess = Chess::from_fen("2k5/8/4q3/4K3/2b5/8/8/8 w - - 0 1".to_string());
+
+        assert!(chess.get_state() == State::Check);
+        assert!(chess.get_playing_side() == Side::White);
+        assert!(!chess.make_move(notation_to_index("E5"), notation_to_index("E6")));
+    }
+
+    #[test]
+    fn take_piece_protected_by_knight_with_king() {
+        let mut chess = Chess::from_fen("2k5/8/4q3/2n1K3/8/8/8/8 w - - 0 1".to_string());
+
+        assert!(chess.get_state() == State::Check);
+        assert!(chess.get_playing_side() == Side::White);
+        assert!(!chess.make_move(notation_to_index("E5"), notation_to_index("E6")));
+    }
+
+    #[test]
+    fn take_piece_protected_by_rook_with_king() {
+        let mut chess = Chess::from_fen("2k5/8/1r2q3/4K3/8/8/8/8 w - - 0 1".to_string());
+
+        assert!(chess.get_state() == State::Check);
+        assert!(chess.get_playing_side() == Side::White);
+        assert!(!chess.make_move(notation_to_index("E5"), notation_to_index("E6")));
+    }
+
+    #[test]
+    fn take_piece_protected_by_queen_with_king() {
+        let mut chess = Chess::from_fen("2k5/3q4/4q3/4K3/8/8/8/8 w - - 0 1".to_string());
+
+        assert!(chess.get_state() == State::Check);
+        assert!(chess.get_playing_side() == Side::White);
+        assert!(!chess.make_move(notation_to_index("E5"), notation_to_index("E6")));
+    }
+
+    #[test]
+    fn take_piece_protected_by_king_with_king() {
+        let mut chess = Chess::from_fen("8/3k4/4q3/4K3/8/8/8/8 w - - 0 1".to_string());
+
+        assert!(chess.get_state() == State::Check);
+        assert!(chess.get_playing_side() == Side::White);
+        assert!(!chess.make_move(notation_to_index("E5"), notation_to_index("E6")));
+    }
+
+    #[test]
+    fn cli() {
+        cli::start();
+    }
 }
 
 fn notation_to_index(move_notation: &'static str) -> usize {
