@@ -6,7 +6,7 @@ pub(crate) fn is_allowed_move(piece: &Piece, board: &Board, index: usize) -> boo
 }
 
 pub(crate) fn get_all_moves(piece: &Piece, board: &Board) -> BitBoard {
-    let opponent = board.get_opponent_board(piece);
+    let opponent_and_empty = board.get_opponent_and_empty_squares_board(piece.get_color());
     let (x, y) = piece.get_pos_as_usize();
     let mut list = vec![];
 
@@ -61,9 +61,9 @@ pub(crate) fn get_all_moves(piece: &Piece, board: &Board) -> BitBoard {
         castling_bitboard.set(y * 8 + 2, true);
     }
 
-    board.check_and_set_piece_iter(piece, list.iter().map(|(x, y)| (*x, *y)), |bitboard, x, y| {
-        if !bitboard.is_empty_on_board_and_set(board, x, y) {
-            bitboard.compare_and_set(opponent, true, x, y);
+    board.check_and_set_piece_iter(piece, list.iter().map(|(x, y)| (*x, *y)), |bitboard, x, y, set| {
+        if opponent_and_empty.get(y * 8 + x) {
+            bitboard.set(y * 8 + x, set);
         }
         false
     }) | castling_bitboard

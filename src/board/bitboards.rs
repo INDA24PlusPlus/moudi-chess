@@ -1,11 +1,20 @@
 use super::{Board, Piece, Side, BitBoard, PieceType};
 
 impl Board {
+    #[inline]
     pub(crate) fn get_opponent_board(&self, piece: &Piece) -> BitBoard {
         match piece.get_color() {
             Side::White => self.black,
             Side::Black => self.white
         }
+    }
+
+    #[inline]
+    pub(crate) fn get_opponent_and_empty_squares_board(&self, side: Side) -> BitBoard {
+        (match side {
+            Side::White => self.black,
+            Side::Black => self.white,
+        }) | !(self.black | self.white)
     }
 
     pub(crate) fn get_sides_board(&self, side: Side) -> BitBoard {

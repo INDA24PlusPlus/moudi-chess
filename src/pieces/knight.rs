@@ -44,8 +44,8 @@ pub(crate) fn get_all_moves(piece: &Piece, board: &Board) -> BitBoard {
         list.push((x - 2, y + 1));
     }
 
-    board.check_and_set_piece_iter(piece, list.iter().map(|(x, y)| (*x, *y)), |bitboard, x, y| {
-        let _ = bitboard.compare_and_set(side, false, x, y);
+    board.check_and_set_piece_iter(piece, list.iter().map(|(x, y)| (*x, *y)), |bitboard, x, y, set| {
+        let _ = set && bitboard.compare_and_set(side, false, x, y);
         false
     })
 }

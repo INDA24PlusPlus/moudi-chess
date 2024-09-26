@@ -104,15 +104,13 @@ impl Board {
         return (NUM_INDECES) - (king_board.to_number().leading_zeros() + 1) as usize;
     }
 
-    pub(crate) fn check_and_set_piece_iter<F>(&self, piece: &Piece, moves: impl Iterator<Item = (usize, usize)>, action: F) -> BitBoard 
-        where F: Fn(&mut BitBoard, usize, usize) -> bool
+    pub(crate) fn check_and_set_piece_iter<F>(&self, piece: &Piece, moves: impl Iterator<Item = (usize, usize)>, stop_pred: F) -> BitBoard 
+        where F: Fn(&mut BitBoard, usize, usize, bool) -> bool
     {
         let mut board = bitboard::EMPTY;
         for (x, y) in moves {
-            if !Board::is_inbounds(x, y) || !self.is_king_safety(piece, x, y) {
-                continue
-            } else if action(&mut board, x, y) {
-                break;
+            if Board::is_inbounds(x, y) && stop_pred(&mut board, x, y, self.is_king_safety(piece, x, y)) {
+                break
             }
         }
 

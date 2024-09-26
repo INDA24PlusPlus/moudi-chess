@@ -17,8 +17,12 @@ fn get_move_bitboard(piece: &Piece, board: &Board) -> BitBoard {
     };
 
     board.check_and_set_piece_iter(piece, CoordinateIterator::from_to(piece.get_pos_as_usize(), end), 
-        |bitboard: &mut BitBoard, x, y| {
-            !bitboard.is_empty_on_board_and_set(board, x, y)
+        |bitboard: &mut BitBoard, x, y, set| {
+            if board.is_empty(y * 8 + x) {
+                bitboard.set(y * 8 + x, set);
+                return false;
+            }
+            true
         })
 }
 
@@ -38,21 +42,25 @@ pub(crate) fn get_attack_bitboard(piece: &Piece, board: &Board) -> BitBoard {
 
     if let Some(ep_index) = board.get_ep_target() {
         // check for en passant and normal attack
-        board.check_and_set_piece_iter(piece, 
-            [((x - 1) as usize, y as usize), ((x + 1) as usize, y as usize)].iter().map(|(x, y)| (*x, *y)),  |bitboard, x, y| {
+        let list = [((x - 1) as usize, y as usize), ((x + 1) as usize, y as usize)];
+        let it = list.iter().map(|(x, y)| (*x, *y));
+        board.check_and_set_piece_iter(piece, it,  |bitboard, x, y, set| {
+            if set {
                 if y * 8 + x == ep_index as usize {
                     bitboard.set(attack_level * 8 + x, true);
                 } else {
                     bitboard.compare_and_set(opponent, true, x, attack_level);
                 }
-                false
-            })
+            }
+            false
+        })
     } else {
         // check for normal attack
-        board.check_and_set_piece_iter(piece, 
-            [((x - 1) as usize, attack_level), ((x + 1) as usize, attack_level)].iter().map(|(x, y)| (*x, *y)), |bitboard, x, y| {
-                let _ = bitboard.compare_and_set(opponent, true, x, y);
-                false
-            })
+        let list = [((x - 1) as usize, attack_level), ((x + 1) as usize, attack_level)];
+        let it = list.iter().map(|(x, y)| (*x, *y));
+        board.check_and_set_piece_iter(piece, it, |bitboard, x, y, set| {
+            let _ = set && bitboard.compare_and_set(opponent, true, x, y);
+            false
+        })
     }
 }
