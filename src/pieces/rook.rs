@@ -14,7 +14,7 @@ pub(crate) fn get_all_moves(piece: &Piece, board: &Board) -> BitBoard {
             bitboard.set(y * 8 + x, set);
             return false;
         }
-        false
+        true
     };
 
     board.check_and_set_piece_iter(piece, CoordinateIterator::from_delta(pos, (0, 1)), action) // NORTH

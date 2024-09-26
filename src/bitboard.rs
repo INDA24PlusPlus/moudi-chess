@@ -1,7 +1,7 @@
 use std::ops::{BitAnd, BitAndAssign, BitOr, BitOrAssign, BitXor, BitXorAssign, Mul, Not};
 use std::fmt::Display;
 
-use crate::{Board, PieceType, NUM_INDECES};
+use crate::{Board, NUM_INDECES};
 
 #[derive(Copy, Clone)]
 pub struct BitBoard (u64);

@@ -1,4 +1,4 @@
-use crate::{bitboard, BitBoard};
+use crate::BitBoard;
 use super::{Board, Piece};
 
 pub(crate) fn is_allowed_move(piece: &Piece, board: &Board, index: usize) -> bool {

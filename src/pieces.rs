@@ -2,17 +2,11 @@ use core::fmt::Display;
 use crate::{bitboard, board::*, BitBoard};
 
 pub(crate) mod pawn;
-pub use pawn::*;
 mod knight;
-pub use knight::*;
 mod bishop;
-pub use bishop::*;
 mod rook;
-pub use rook::*;
 mod queen;
-pub use queen::*;
 mod king;
-pub use king::*;
 
 
 #[derive(Copy, Clone, PartialEq, Eq, Debug)]

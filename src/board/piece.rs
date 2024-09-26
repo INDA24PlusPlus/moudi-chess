@@ -11,7 +11,7 @@ impl Board {
         // if there is an active en passant target
         if let Some(ep_index) = self.ep_target {
             if piece.get_piece_type() == PieceType::Pawn && index.abs_diff(ep_index as usize) == 8 {
-                self.take_en_passant(&piece, ep_index);
+                self.take_en_passant(piece, ep_index);
             }
             self.ep_target = None;
         }
@@ -25,7 +25,7 @@ impl Board {
             self.set_piece(index, capture_type, piece.get_color().get_opposite(), false);
             self.moves_to_50 = 0; // reset to 0 on capture
         } else if piece.get_piece_type() == PieceType::Pawn {
-            self.encode_en_passant(&piece, index as i8);
+            self.encode_en_passant(piece, index as i8);
             self.moves_to_50 = 0; // reset if a pawn is moved
         } else {
             self.moves_to_50 += 1;
@@ -101,7 +101,7 @@ impl Board {
 
         assert!(king_board.to_number() != 0);
         
-        return (NUM_INDECES) - (king_board.to_number().leading_zeros() + 1) as usize;
+        (NUM_INDECES) - (king_board.to_number().leading_zeros() + 1) as usize
     }
 
     pub(crate) fn check_and_set_piece_iter<F>(&self, piece: &Piece, moves: impl Iterator<Item = (usize, usize)>, stop_pred: F) -> BitBoard 

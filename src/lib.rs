@@ -14,7 +14,6 @@ mod coordinateiterator;
 use crate::coordinateiterator::*;
 
 mod file;
-use crate::file::*;
 
 mod cli;
 
@@ -168,7 +167,7 @@ mod tests {
     }
 
     #[test]
-    fn fn_castle_while_in_check() {
+    fn castle_while_in_check() {
         let mut chess = Chess::from_fen("4k3/8/8/q7/7q/8/8/R3K2R w KQ - 0 1".to_string());
 
         assert!(chess.get_state() == State::Check);
@@ -179,6 +178,53 @@ mod tests {
         assert!(!chess.make_move(notation_to_index("E1"), notation_to_index("C1")));
 
         assert!(chess.get_playing_side() == Side::White);
+    }
+
+    #[test]
+    fn not_jump_over_piece_to_capture_king_attacker_with_rook() {
+        let mut chess = Chess::new();
+
+        assert!(chess.get_playing_side() == Side::White);
+        assert!(chess.make_move(notation_to_index("E2"), notation_to_index("E4")));
+
+        assert!(chess.get_playing_side() == Side::Black);
+        assert!(chess.make_move(notation_to_index("F7"), notation_to_index("F6")));
+
+        assert!(chess.get_playing_side() == Side::White);
+        assert!(chess.make_move(notation_to_index("D1"), notation_to_index("H5")));
+
+        assert!(chess.get_playing_side() == Side::Black);
+        assert!(!chess.make_move(notation_to_index("H8"), notation_to_index("H5")));
+    }
+
+    #[test]
+    fn not_jump_over_piece_to_capture_king_attacker_with_bishop() {
+        let mut chess = Chess::new();
+
+        assert!(chess.get_playing_side() == Side::White);
+        assert!(chess.make_move(notation_to_index("E2"), notation_to_index("E4")));
+
+        assert!(chess.get_playing_side() == Side::Black);
+        assert!(chess.make_move(notation_to_index("D7"), notation_to_index("D5")));
+
+        assert!(chess.get_playing_side() == Side::White);
+        assert!(chess.make_move(notation_to_index("E4"), notation_to_index("D5")));
+
+        assert!(chess.get_playing_side() == Side::Black);
+        assert!(chess.make_move(notation_to_index("D8"), notation_to_index("D5")));
+
+        assert!(chess.get_playing_side() == Side::White);
+        assert!(chess.make_move(notation_to_index("G1"), notation_to_index("F3")));
+
+        assert!(chess.get_playing_side() == Side::Black);
+        assert!(chess.make_move(notation_to_index("D5"), notation_to_index("E4")));
+
+        assert!(chess.get_state() == State::Check);
+        assert!(chess.get_playing_side() == Side::White);
+        assert!(!chess.make_move(notation_to_index("C1"), notation_to_index("E3")));
+
+        assert!(chess.get_playing_side() == Side::White);
+        assert!(chess.make_move(notation_to_index("F1"), notation_to_index("E2")));
     }
 
     #[test]

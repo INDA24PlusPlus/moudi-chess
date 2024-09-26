@@ -1,11 +1,11 @@
 use std::{char, io::{self, Write}, time::{SystemTime, UNIX_EPOCH}};
 
-use crate::{Board, Chess, File, Side};
+use crate::{Board, Chess, Side};
 
 pub fn start() {
     let mut chess = Chess::default();
     
-    while true {
+    loop {
         let mut input = String::new();
 
         input.clear();
@@ -67,6 +67,16 @@ pub fn start() {
                     _ => {}
                 }
             }
+            "oae" => {
+                if split.len() <= 1 {
+                    continue;
+                }
+                match split[1] {
+                    "white" | "w" => println!("{}", chess.board.get_opponent_and_empty_squares_board(Side::White)),
+                    "black" | "b" => println!("{}", chess.board.get_opponent_and_empty_squares_board(Side::Black)),
+                    _ => {}
+                }
+            },
             "white" => chess.board.print_side(Side::White),
             "black" => chess.board.print_side(Side::Black),
             "state" => println!("{:?}", chess.get_state()),

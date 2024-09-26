@@ -43,21 +43,16 @@ pub(crate) fn get_all_moves(piece: &Piece, board: &Board) -> BitBoard {
     let attacked = board.get_side_computed_boards(piece.get_color()).2;
     let combined_board = board.get_combined_piece_board();
     
-    let pred = |(x, y)| {
-        if attacked.get(y * 8 + x) || combined_board.get(y * 8 + x) {
-            return true;
-        }
-        false
-    };
+    let is_not_empty_or_attacked = |(x, y)| attacked.get(y * 8 + x) || combined_board.get(y * 8 + x);
 
     let mut castling_bitboard = bitboard::EMPTY;
     // has king side castlingability that those slots are open and not attacked
-    if castling.has(CastlingAbility::King) && !CoordinateIterator::from_inclusive_to(piece.get_pos_as_usize(), (6, y)).any(pred) {
+    if castling.has(CastlingAbility::King) && !CoordinateIterator::from_inclusive_to(piece.get_pos_as_usize(), (6, y)).any(is_not_empty_or_attacked) {
         castling_bitboard.set(y * 8 + 6, true);
     }
 
     // has queen side castlingability that those slots are open and not attacked
-    if castling.has(CastlingAbility::Queen) && !CoordinateIterator::from_inclusive_to(piece.get_pos_as_usize(), (2, y)).any(pred) {
+    if castling.has(CastlingAbility::Queen) && !CoordinateIterator::from_inclusive_to(piece.get_pos_as_usize(), (2, y)).any(is_not_empty_or_attacked) {
         castling_bitboard.set(y * 8 + 2, true);
     }
 
