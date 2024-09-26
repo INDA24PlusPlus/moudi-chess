@@ -168,6 +168,20 @@ mod tests {
     }
 
     #[test]
+    fn fn_castle_while_in_check() {
+        let mut chess = Chess::from_fen("4k3/8/8/q7/7q/8/8/R3K2R w KQ - 0 1".to_string());
+
+        assert!(chess.get_state() == State::Check);
+        assert!(chess.get_playing_side() == Side::White);
+        assert!(!chess.make_move(notation_to_index("E1"), notation_to_index("G1")));
+
+        assert!(chess.get_playing_side() == Side::White);
+        assert!(!chess.make_move(notation_to_index("E1"), notation_to_index("C1")));
+
+        assert!(chess.get_playing_side() == Side::White);
+    }
+
+    #[test]
     fn cli() {
         cli::start();
     }

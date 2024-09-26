@@ -5,6 +5,7 @@ pub struct CoordinateIterator {
     end: (usize, usize),
     dx: isize,
     dy: isize,
+    inclusive: bool
 }
 
 impl CoordinateIterator {
@@ -14,6 +15,17 @@ impl CoordinateIterator {
             end,
             dx: (end.0 as isize - start.0 as isize).signum(),
             dy: (end.1 as isize - start.1 as isize).signum(),
+            inclusive: false,
+        }
+    }
+
+    pub fn from_inclusive_to(start: (usize, usize), end: (usize, usize)) -> Self {
+        CoordinateIterator {
+            current: start,
+            end,
+            dx: (end.0 as isize - start.0 as isize).signum(),
+            dy: (end.1 as isize - start.1 as isize).signum(),
+            inclusive: true,
         }
     }
 
@@ -23,6 +35,7 @@ impl CoordinateIterator {
             end: (if delta.0 < 0 {0} else {8}, if delta.1 < 0 {0} else {8}),
             dx: delta.0,
             dy: delta.1,
+            inclusive: false,
         }
     }
 
@@ -43,8 +56,12 @@ impl Iterator for CoordinateIterator {
             return None;
         }
         
-        self.current.0 = (self.current.0 as isize + self.dx) as usize;
-        self.current.1 = (self.current.1 as isize + self.dy) as usize;
+        if !self.inclusive {
+            self.current.0 = (self.current.0 as isize + self.dx) as usize;
+            self.current.1 = (self.current.1 as isize + self.dy) as usize;
+        } else {
+            self.inclusive = false;
+        }
 
         Some(self.current)
     }
