@@ -54,6 +54,18 @@ impl BitBoard {
     pub fn clear(&mut self) {
         self.0 = 0;
     }
+
+    pub fn filter_on<F>(&mut self, predicate: F) -> Self 
+        where F: Fn(usize) -> bool
+    {
+        let mut board = EMPTY;
+
+        for index in self {
+            board.set(index, predicate(index))
+        }
+
+        board
+    }
 }
 
 impl Iterator for BitBoard {

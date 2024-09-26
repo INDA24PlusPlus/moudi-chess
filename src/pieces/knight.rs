@@ -1,12 +1,18 @@
-use crate::BitBoard;
+use crate::{board, BitBoard};
 use super::{Board, Piece};
 
 pub(crate) fn is_allowed_move(piece: &Piece, board: &Board, index: usize) -> bool {
-    get_all_moves(piece, board).get(index)
+    get_allowed_moves(piece, board).get(index)
 }
 
-pub(crate) fn get_all_moves(piece: &Piece, board: &Board) -> BitBoard {
+pub(crate) fn get_allowed_moves(piece: &Piece, board: &Board) -> BitBoard {
     let side = board.get_sides_board(piece.get_color());
+    board.filter_king_safety(
+        get_attacked_squares(piece, board)
+            .filter_on(|index| !side.get(index)), piece)
+}
+
+pub(crate) fn get_attacked_squares(piece: &Piece, board: &Board) -> BitBoard {
     let (x, y) = piece.get_pos_as_usize();
     let mut list = vec![];
 
@@ -44,8 +50,8 @@ pub(crate) fn get_all_moves(piece: &Piece, board: &Board) -> BitBoard {
         list.push((x - 2, y + 1));
     }
 
-    board.check_and_set_piece_iter(piece, list.iter().map(|(x, y)| (*x, *y)), |bitboard, x, y, set| {
-        let _ = set && bitboard.compare_and_set(side, false, x, y);
+    board.check_and_set_piece_iter(list.iter().map(|(x, y)| (*x, *y)), |bitboard, x, y| {
+        bitboard.set(y * 8 + x, true);
         false
     })
 }

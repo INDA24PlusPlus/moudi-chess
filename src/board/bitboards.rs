@@ -2,8 +2,8 @@ use super::{Board, Piece, Side, BitBoard, PieceType};
 
 impl Board {
     #[inline]
-    pub(crate) fn get_opponent_board(&self, piece: &Piece) -> BitBoard {
-        match piece.get_color() {
+    pub(crate) fn get_opponent_board(&self, side: Side) -> BitBoard {
+        match side {
             Side::White => self.black,
             Side::Black => self.white
         }

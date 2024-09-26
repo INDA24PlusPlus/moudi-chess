@@ -71,14 +71,26 @@ impl Piece {
 
     pub(crate) fn get_possible_moves(&self, board: &Board) -> BitBoard {
         match self.piece {
-            PieceType::Pawn => pawn::get_all_moves(self, board),
-            PieceType::Knight => knight::get_all_moves(self, board),
-            PieceType::Bishop => bishop::get_all_moves(self, board),
-            PieceType::Rook => rook::get_all_moves(self, board),
-            PieceType::Queen => queen::get_all_moves(self, board),
-            PieceType::King => king::get_all_moves(self, board),
+            PieceType::Pawn => pawn::get_allowed_moves(self, board),
+            PieceType::Knight => knight::get_allowed_moves(self, board),
+            PieceType::Bishop => bishop::get_allowed_moves(self, board),
+            PieceType::Rook => rook::get_allowed_moves(self, board),
+            PieceType::Queen => queen::get_allowed_moves(self, board),
+            PieceType::King => king::get_allowed_moves(self, board),
             _ => bitboard::EMPTY,
         }    
+    }
+
+    pub(crate) fn get_attacked_square(&self, board: &Board) -> BitBoard {
+        match self.piece {
+            PieceType::Pawn => pawn::get_attacked_squares(self, board),
+            PieceType::Knight => knight::get_attacked_squares(self, board),
+            PieceType::Bishop => bishop::get_attacked_squares(self, board),
+            PieceType::Rook => rook::get_attacked_squares(self, board),
+            PieceType::Queen => queen::get_attacked_squares(self, board),
+            PieceType::King => king::get_attacked_squares(self, board),
+            _ => bitboard::EMPTY,
+        }
     }
 
     /// Get the PieceType of a piece

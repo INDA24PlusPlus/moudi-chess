@@ -66,10 +66,7 @@ impl Board {
                 continue;
             }
 
-            let attack = match piece.get_piece_type() {
-                PieceType::Pawn => crate::pieces::pawn::get_attack_bitboard(&piece, self),
-                _ => piece.get_possible_moves(self),
-            };
+            let attack = piece.get_attacked_square(self);
 
             if attack.get(king_index) {
                 attacking.push(piece);
@@ -102,12 +99,12 @@ impl Board {
                 return false;
             }
             // if taking this piece results in being attacked
-            if let Some(capturing_piece) = self.get_piece_at_pos(y * 8 + x) {
-                // if piece is not same color
-                if capturing_piece.get_color() != piece.get_color() && self.is_guarded_piece(&capturing_piece) {
-                    return false;
-                }
-            }
+            // if let Some(capturing_piece) = self.get_piece_at_pos(y * 8 + x) {
+            //     // if piece is not same color
+            //     if capturing_piece.get_color() != piece.get_color() && self.is_guarded_piece(&capturing_piece) {
+            //         return false;
+            //     }
+            // }
         } else {
             // king is attacked by more than two and trying to move another piece
             if attacking.len() >= 2 {
@@ -135,48 +132,48 @@ impl Board {
         CoordinateIterator::from_to(attacking_piece.get_pos_as_usize(), (king_index % 8, king_index / 8)).contains((x, y))
     }
 
-    fn is_guarded_piece(&self, piece: &Piece) -> bool {
-        let mut board = Board {
-            pieces: self.pieces.clone(),
-            white: self.white.clone(),
-            black: self.black.clone(),
-            side: self.side.clone(),
-            castling: self.castling.clone(),
-            ep_target: self.ep_target.clone(),
-            moves_to_50: 0,
-            move_counter: 0,
-
-            white_attacking_king: vec![],
-            black_attacking_king: vec![],
-            white_attacked: bitboard::EMPTY,
-            black_attacked: bitboard::EMPTY,
-            white_pinned: bitboard::EMPTY,
-            black_pinned: bitboard::EMPTY,
-        };
-
-        let index = piece.get_occupied_slot();
-        let side = piece.get_color();
-        // remove the piece from the board so we can do a get_possible_move and check if that index
-        // is a possible move
-        board.set_piece(index, piece.get_piece_type(), piece.get_color(), false);
-
-        for protecting_piece in board.get_all_pieces() {
-            if protecting_piece.get_color() != side {
-                continue;
-            }
-
-            let attack = match protecting_piece.get_piece_type() {
-                PieceType::Pawn => crate::pieces::pawn::get_attack_bitboard(&protecting_piece, &board),
-                _ => protecting_piece.get_possible_moves(&board),
-            };
-
-            if attack.get(index) {
-                return true;
-            }
-        }
-
-        false
-    }
+    // fn is_guarded_piece(&self, piece: &Piece) -> bool {
+    //     let mut board = Board {
+    //         pieces: self.pieces.clone(),
+    //         white: self.white.clone(),
+    //         black: self.black.clone(),
+    //         side: self.side.clone(),
+    //         castling: self.castling.clone(),
+    //         ep_target: self.ep_target.clone(),
+    //         moves_to_50: 0,
+    //         move_counter: 0,
+    //
+    //         white_attacking_king: vec![],
+    //         black_attacking_king: vec![],
+    //         white_attacked: bitboard::EMPTY,
+    //         black_attacked: bitboard::EMPTY,
+    //         white_pinned: bitboard::EMPTY,
+    //         black_pinned: bitboard::EMPTY,
+    //     };
+    //
+    //     let index = piece.get_occupied_slot();
+    //     let side = piece.get_color();
+    //     // remove the piece from the board so we can do a get_possible_move and check if that index
+    //     // is a possible move
+    //     board.set_piece(index, piece.get_piece_type(), piece.get_color(), false);
+    //
+    //     for protecting_piece in board.get_all_pieces() {
+    //         if protecting_piece.get_color() != side {
+    //             continue;
+    //         }
+    //
+    //         let attack = match protecting_piece.get_piece_type() {
+    //             PieceType::Pawn => crate::pieces::pawn::get_attack_bitboard(&protecting_piece, &board),
+    //             _ => protecting_piece.get_possible_moves(&board),
+    //         };
+    //
+    //         if attack.get(index) {
+    //             return true;
+    //         }
+    //     }
+    //
+    //     false
+    // }
 
     pub(crate) fn is_no_possible_moves(&self, side: Side) -> bool {
 

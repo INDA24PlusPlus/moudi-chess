@@ -81,6 +81,7 @@ pub fn start() {
             "black" => chess.board.print_side(Side::Black),
             "state" => println!("{:?}", chess.get_state()),
             "turn" => println!("{:?}", chess.board.get_playing_side()),
+            "exit" => break,
             _ => {}
         }
 
